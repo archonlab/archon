@@ -1,0 +1,3 @@
+Release/ARCHON_RELEASE1_PRODUCTION.json
+Release/RELEASE3/atlas_bootstrap_manifest.json
+Release/RELEASE3/config_bootstrap_manifest.json

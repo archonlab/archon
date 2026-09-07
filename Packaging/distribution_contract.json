@@ -1,0 +1,50 @@
+{
+  "schema": "archon_distribution_contract_v1",
+  "studio_version": "STUDIO20.5",
+  "product_version": "1.0.0",
+  "principles": {
+    "single_scientific_tree": true,
+    "single_studio_runtime": true,
+    "node_at_runtime": false,
+    "internet_at_runtime": false,
+    "platform_specific_science_forks": false,
+    "bundled_python_supported": true
+  },
+  "runtime_python": {
+    "environment_override": "ARCHON_RUNTIME_PYTHON",
+    "bundle_root": "Runtime/python",
+    "resolution_order": [
+      "ARCHON_RUNTIME_PYTHON",
+      "Runtime/python canonical platform path",
+      "source-launch interpreter when not frozen",
+      "PATH fallback"
+    ],
+    "minimum_version": "3.12"
+  },
+  "platforms": {
+    "windows": {
+      "target_artifact": "ARCHON-Studio-1.0.0.exe",
+      "runtime_python": "Runtime/python/python.exe",
+      "source_launcher": "ARCHON_STUDIO.bat",
+      "stage_script": "Packaging/windows/prepare.ps1"
+    },
+    "macos": {
+      "target_artifact": "ARCHON-Studio-1.0.0.dmg",
+      "runtime_python": "Runtime/python/bin/python3",
+      "source_launcher": "ARCHON_STUDIO.command",
+      "stage_script": "Packaging/macos/prepare.sh"
+    },
+    "linux": {
+      "target_artifact": "ARCHON-Studio-1.0.0.AppImage",
+      "runtime_python": "Runtime/python/bin/python3",
+      "source_launcher": "ARCHON_STUDIO.sh",
+      "stage_script": "Packaging/linux/prepare.sh"
+    }
+  },
+  "stage": {
+    "builder": "Tools/archon_distribution_stage.py",
+    "whitelist": "Release/STUDIO20.5/packaging_whitelist.txt",
+    "runtime_destination": "Runtime/python",
+    "runtime_root_must_be_complete": true
+  }
+}

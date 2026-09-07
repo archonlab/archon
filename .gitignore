@@ -1,0 +1,34 @@
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Frontend dependencies and development caches
+node_modules/
+.next/
+.wrangler/
+*.tsbuildinfo
+
+# Local secrets and environment overrides
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Runtime-generated scientific and operator state
+Atlas/**
+Results/**
+Config/**/*.tmp
+Config/**/*.local.json
+Config/ObserverLauncher/cache/
+archon-studio/public/studio/previews/
+archon-studio/public/studio/*.tmp
+
+# Platform/editor noise
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+*~

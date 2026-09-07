@@ -1,0 +1,14 @@
+{
+  "rail_tab": "instruments",
+  "rail_width": 380,
+  "schema": "archon.ol2-ui-preferences.v1",
+  "theme": "system",
+  "visible_metric_ids": [
+    "objects",
+    "total_living_mass",
+    "largest",
+    "ecosystem_health",
+    "stability_index",
+    "life_score"
+  ]
+}

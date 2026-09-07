@@ -1,0 +1,142 @@
+{
+  "schema": "archon_studio_snapshot_v5",
+  "generated_at": "2026-09-07T22:01:16+00:00",
+  "mode": "empty_research_state",
+  "source_state": {
+    "atlas_updated": null,
+    "knowledge_generated": null,
+    "director_generated_at": null,
+    "live_results_available": false,
+    "knowledge_integrity_ok": false,
+    "research_empty": true
+  },
+  "metrics": [
+    {
+      "key": "worlds",
+      "label": "Worlds",
+      "value": 0,
+      "detail": "No retained worlds yet"
+    },
+    {
+      "key": "rules",
+      "label": "Rules",
+      "value": 0,
+      "detail": "Research has not started"
+    },
+    {
+      "key": "experiments",
+      "label": "Experiments",
+      "value": 0,
+      "detail": "No experiments yet"
+    },
+    {
+      "key": "discoveries",
+      "label": "Discoveries",
+      "value": 0,
+      "detail": "No discoveries yet"
+    },
+    {
+      "key": "mechanisms",
+      "label": "Mechanisms",
+      "value": 0,
+      "detail": "No mechanisms yet"
+    },
+    {
+      "key": "predictions",
+      "label": "Predictions",
+      "value": 0,
+      "detail": "No predictions yet"
+    }
+  ],
+  "research_map": {
+    "worlds": 0,
+    "rules": 0,
+    "mechanisms": 0,
+    "principles": 0,
+    "predictions": 0
+  },
+  "director": {
+    "generated_at": null,
+    "stage": "Research not started",
+    "trend": "Waiting",
+    "maturity": 0.0,
+    "risk": 0.0,
+    "maturity_delta": 0.0,
+    "risk_delta": 0.0,
+    "evidence_strength": 0.0,
+    "consensus_strength": 0.0,
+    "planned_experiments": 0,
+    "confirmed_predictions": 0,
+    "testing_predictions": 0,
+    "integrity_ok": false,
+    "summary": "No retained worlds are present yet. Start Universe Search to begin research; Studio will populate automatically when canonical Atlas data appears.",
+    "priority_follow_up": null,
+    "sources": []
+  },
+  "highlights": [],
+  "feed": [],
+  "feed_meta": {
+    "card_count": 0,
+    "preview_card_count": 0,
+    "source_family_count": 0,
+    "sources": {
+      "Worlds": {
+        "available": 0,
+        "cards": 0
+      },
+      "Experiments": {
+        "available": 0,
+        "cards": 0
+      },
+      "Evidence": {
+        "available": 0,
+        "cards": 0
+      },
+      "Mechanisms": {
+        "available": 0,
+        "cards": 0
+      },
+      "Predictions": {
+        "available": 0,
+        "cards": 0
+      },
+      "Director": {
+        "available": 0,
+        "cards": 0
+      }
+    }
+  },
+  "worlds": [],
+  "rules": [],
+  "experiments": [],
+  "evidence": [],
+  "mechanisms": [],
+  "predictions": [],
+  "browser_meta": {
+    "world_count": 0,
+    "world_preview_count": 0,
+    "rule_count": 0,
+    "scientific_rule_count": 0,
+    "rules_with_worlds": 0,
+    "experiment_count": 0,
+    "representative_experiment_count": 0,
+    "observational_experiment_count": 0,
+    "evidence_count": 0,
+    "evidence_with_support": 0,
+    "mechanism_count": 0,
+    "medium_plus_mechanism_count": 0,
+    "scientific_mechanism_count": 0,
+    "prediction_count": 0,
+    "open_prediction_count": 0,
+    "confirmed_prediction_count": 0
+  },
+  "provenance": {
+    "worlds": "Atlas/Worlds/atlas_index.json",
+    "research_atlas": "Atlas/Knowledge/research_atlas.json",
+    "knowledge_base": "Atlas/Knowledge/knowledge_base.json",
+    "research_director": "Atlas/Knowledge/research_director_history.json",
+    "knowledge_integrity": "Atlas/Knowledge/knowledge_base_integrity.json",
+    "predictions": "Atlas/Knowledge/prediction_database.json",
+    "consensus": "Atlas/Knowledge/consensus_database.json"
+  }
+}

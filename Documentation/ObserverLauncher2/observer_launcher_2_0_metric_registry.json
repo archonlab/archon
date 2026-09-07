@@ -1,0 +1,109 @@
+{
+  "schema": "archon_observer_launcher_2_metric_registry_v1",
+  "milestone": "OL2-DESIGN1",
+  "revision": 1,
+  "source_contract": {
+    "sample_fields": 212,
+    "pressure_fields": 28,
+    "event_fields": 3,
+    "chronicle_fields": 10,
+    "channels": ["samples", "pressure", "events", "chronicle"],
+    "scientific_access": "read_only"
+  },
+  "default_cards": [
+    {"id": "objects", "label": "Objects / Colonies", "source": "samples.objects", "kind": "persisted", "format": "integer"},
+    {"id": "total_living_mass", "label": "Living Mass", "source": "samples.total_living_mass", "kind": "persisted", "format": "integer"},
+    {"id": "largest", "label": "Largest Colony", "source": "samples.largest", "kind": "persisted", "format": "integer"},
+    {"id": "ecosystem_health", "label": "Ecosystem Health", "source": "samples.ecosystem_health", "kind": "persisted", "format": "score_0_1"},
+    {"id": "stability_index", "label": "Stability", "source": "samples.stability_index", "kind": "persisted", "format": "score_0_1"},
+    {"id": "life_score", "label": "Life Evidence", "source": "samples.life_score", "secondary_source": "samples.life_confidence", "kind": "persisted", "format": "score_0_1"}
+  ],
+  "state_strip": [
+    {"id": "life_state", "source": "samples.life_state"},
+    {"id": "structural_state", "source": "samples.structural_state"},
+    {"id": "ecosystem_phase", "source": "samples.ecosystem_phase"},
+    {"id": "morphology_class", "source": "samples.morphology_class"},
+    {"id": "validation_grade", "source": "samples.payload_json.validation_grade"}
+  ],
+  "profiles": {
+    "population": [
+      "samples.payload_json.birth_rate_1000",
+      "samples.payload_json.death_rate_1000",
+      "samples.payload_json.dominance_ratio",
+      "samples.payload_json.active_families",
+      "samples.payload_json.active_colonies_tracked",
+      "samples.payload_json.deepest_generation",
+      "samples.payload_json.oldest_lineage_age",
+      "samples.payload_json.demo_survival_ratio"
+    ],
+    "pressure": [
+      "pressure.stress",
+      "pressure.adapt",
+      "pressure.pressure",
+      "pressure.recovery",
+      "pressure.risk",
+      "pressure.cause"
+    ],
+    "morphology": [
+      "samples.morphology_class",
+      "samples.payload_json.morphology_compactness",
+      "samples.payload_json.morphology_aspect",
+      "samples.payload_json.morphology_edge_complexity",
+      "samples.payload_json.morphology_symmetry",
+      "samples.payload_json.morphology_branching",
+      "samples.payload_json.morphology_change_rate"
+    ],
+    "knowledge_evidence": [
+      "samples.payload_json.knowledge_score",
+      "samples.payload_json.feedback_score",
+      "samples.emergence_score",
+      "samples.payload_json.emergence_confidence",
+      "samples.validation_quality",
+      "samples.payload_json.validation_grade",
+      "samples.payload_json.validation_repeatability"
+    ],
+    "civilization": [
+      "samples.payload_json.civ_stage",
+      "samples.payload_json.civ_score",
+      "samples.payload_json.civ_cities",
+      "samples.payload_json.civ_urbanization",
+      "samples.payload_json.civ_cohesion",
+      "samples.payload_json.civ_tech_index",
+      "samples.payload_json.civ_collapse_risk"
+    ]
+  },
+  "optional_derived": [
+    {
+      "id": "field_occupancy",
+      "label": "Field Occupancy",
+      "formula": "samples.total_living_mass / verified_field_area",
+      "guard": "verified_field_width_and_height_present",
+      "badge": "derived",
+      "replaces_mockup_label": "Density"
+    },
+    {
+      "id": "cell_change_ratio",
+      "label": "Cell Change Ratio",
+      "formula": "samples.payload_json.changed / verified_field_area",
+      "guard": "verified_field_width_and_height_present",
+      "badge": "derived",
+      "replaces_mockup_label": "Activity"
+    }
+  ],
+  "runtime_only": [
+    {"id": "fps", "source": "RuntimeStatusPort.fps", "currently_available_to_ol2": false},
+    {"id": "tps", "source": "RuntimeStatusPort.tps", "currently_available_to_ol2": false},
+    {"id": "draw_ms", "source": "RuntimeStatusPort.draw_ms", "currently_available_to_ol2": false},
+    {"id": "render_enabled", "source": "RuntimeStatusPort.render_enabled", "currently_available_to_ol2": false},
+    {"id": "speed", "source": "RuntimeStatusPort.speed", "currently_available_to_ol2": false}
+  ],
+  "unsupported_mockup_metrics": [
+    {"id": "entropy", "reason": "no accepted Observer telemetry field or owned scientific definition"}
+  ],
+  "mockup_mappings": {
+    "cluster_count": "objects",
+    "largest_cluster": "largest",
+    "births": "samples.payload_json.birth_rate_1000",
+    "deaths": "samples.payload_json.death_rate_1000"
+  }
+}

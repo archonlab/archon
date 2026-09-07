@@ -1,0 +1,7 @@
+{
+  "schema": "archon_search_launcher_settings_v1",
+  "settings": {
+    "confirm_close": true,
+    "theme": "light"
+  }
+}

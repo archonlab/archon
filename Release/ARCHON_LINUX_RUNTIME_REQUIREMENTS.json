@@ -1,0 +1,74 @@
+{
+  "schema": "archon_linux_runtime_requirements_v1",
+  "release_target": {
+    "operating_system": "linux",
+    "python": ">=3.12",
+    "architectures": [
+      "x86_64",
+      "aarch64"
+    ]
+  },
+  "python_distributions": {
+    "required": [
+      {
+        "distribution": "numpy",
+        "install_requirement": "numpy>=1.24",
+        "imports": [
+          "numpy"
+        ],
+        "purpose": "CPU field backend and scientific prediction"
+      }
+    ],
+    "optional": [
+      {
+        "distribution": "Pillow",
+        "install_requirement": "Pillow>=9.1",
+        "imports": [
+          "PIL"
+        ],
+        "purpose": "PNG and GIF previews; runtime degrades safely when absent"
+      },
+      {
+        "distribution": "CuPy",
+        "install_requirement": "CuPy package matching the installed CUDA toolkit",
+        "imports": [
+          "cupy",
+          "cupyx"
+        ],
+        "purpose": "Opt-in CUDA acceleration through ART_EVO_FIELD_BACKEND=cupy"
+      }
+    ]
+  },
+  "system_runtime": {
+    "required_commands": [
+      "bash",
+      "dirname",
+      "env",
+      "python3"
+    ],
+    "optional_commands": [
+      "xdg-open"
+    ],
+    "required_python_interfaces": [
+      "sqlite3",
+      "tkinter"
+    ],
+    "required_filesystem_interfaces": [
+      "/proc"
+    ],
+    "distribution_package_hints": [
+      "python3",
+      "python3-tk",
+      "bash",
+      "coreutils"
+    ]
+  },
+  "runtime_policy": {
+    "temporary_files": "Python tempfile and TMPDIR; no fixed temporary-directory path",
+    "default_compute_backend": "numpy",
+    "cuda_required": false,
+    "desktop_display": "X11 or Wayland is required for interactive GUI routes; headless validation routes do not require a display",
+    "desktop_path_opening": "xdg-open is optional and affects convenience actions only",
+    "shell_execution": "argv subprocess execution only; shell=True is forbidden"
+  }
+}

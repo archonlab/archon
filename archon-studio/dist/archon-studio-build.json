@@ -1,0 +1,45 @@
+{
+  "schema": "archon_studio_production_bundle_v1",
+  "studio_version": "STUDIO20.5",
+  "built_at": "2026-09-07T03:43:52+00:00",
+  "source_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "file_count": 6,
+  "bytes": 664651,
+  "files": [
+    {
+      "path": "assets/index-C10CtkIE.js",
+      "bytes": 391995,
+      "sha256": "a2cb69decc20a6acc56335aeb6abfbe793647f793deba9b2ada45f62e7fc987b"
+    },
+    {
+      "path": "assets/style-BAhR_co-.css",
+      "bytes": 252975,
+      "sha256": "e483dbdd51ff59f09097097255ebf2c3c1d534c92d7cc6ad2ff66377b5707041"
+    },
+    {
+      "path": "assets/world-portability.css",
+      "bytes": 4653,
+      "sha256": "80284e79b4504916465c5e92d877f72fea6063ca27fcda94b52b7f8218ba1cab"
+    },
+    {
+      "path": "assets/world-portability.js",
+      "bytes": 13912,
+      "sha256": "6bb2563b2c3c52d1a53a75d70b494c7e6806d3aaacc1386533f62a3c663d3b08"
+    },
+    {
+      "path": "index.html",
+      "bytes": 675,
+      "sha256": "e1be6ed4374abace6337dc701b74231ac5ba21d63381fc7c4491781a5f19e253"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 441,
+      "sha256": "21172b06355d8fcb01dbe37cbc3983bd6e4373c447e3237641b2b0c1ddbed97d"
+    }
+  ],
+  "runtime_data": {
+    "snapshot": "/studio/snapshot.json",
+    "previews": "/studio/previews/",
+    "bundled": false
+  }
+}

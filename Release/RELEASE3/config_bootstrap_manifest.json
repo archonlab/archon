@@ -1,0 +1,46 @@
+{
+  "schema": "archon_release3_2_config_first_run_bootstrap_v1",
+  "milestone": "RELEASE3.2-CONFIG-FIRST-RUN-BOOTSTRAP",
+  "status": "PASS",
+  "bootstrap_mode": "PORTABLE_DEFAULTS_AND_LAZY_CACHE",
+  "bootstrap_directories": [
+    "Config/ObserverLauncher/",
+    "Config/ObserverLauncher/cache/"
+  ],
+  "packaged_config_state": [],
+  "local_config_paths": [
+    "Config/ObserverLauncher/launcher_profile.json",
+    "Config/ObserverLauncher/ui_preferences.json",
+    "Config/ObserverLauncher/cache/world_catalog_v1.json"
+  ],
+  "first_run_files": {
+    "launcher_profile": "authorized active profile; no local acceptance hash",
+    "ui_preferences": "code-owned portable presentation defaults",
+    "world_catalog_cache": "created lazily after validating local Atlas/Results sources"
+  },
+  "runtime_ownership": {
+    "mode": "PACKAGED_PYTHON_CODE",
+    "owners": [
+      "Analyzer_next/cli/observer_launcher_profile.py",
+      "Analyzer_next/cli/observer_launcher_2.py",
+      "Analyzer_next/execution/observer/shell2/cutover1/service.py",
+      "Analyzer_next/adapters/observer/ui_preferences.py",
+      "Analyzer_next/execution/observer/shell2/catalog1/__init__.py",
+      "Analyzer_next/execution/observer/shell2/catalog1/cache.py"
+    ],
+    "missing": []
+  },
+  "first_run_contract": {
+    "builder_launcher_profile_absent": true,
+    "builder_ui_preferences_absent": true,
+    "builder_world_catalog_cache_absent": true,
+    "machine_specific_paths_absent": true,
+    "authorized_profile_materialized_on_first_observer_launch": true,
+    "portable_ui_defaults_materialized_on_first_observer_launch": true,
+    "world_catalog_cache_is_source_derived": true,
+    "existing_install_config_is_never_deleted": true,
+    "existing_install_config_is_never_rewritten": true
+  },
+  "blockers": [],
+  "content_hash": "7eb10cfaa9c44ca3b89145ea3068cc3f2b5aede977adac03e8bb7a033d2ddd73"
+}

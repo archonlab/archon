@@ -1,0 +1,20 @@
+{
+  "index.html": {
+    "file": "assets/index-C10CtkIE.js",
+    "name": "index",
+    "src": "index.html",
+    "isEntry": true
+  },
+  "style.css": {
+    "file": "assets/style-BAhR_co-.css",
+    "src": "style.css"
+  },
+  "world-portability.css": {
+    "file": "assets/world-portability.css",
+    "src": "world-portability.css"
+  },
+  "world-portability.js": {
+    "file": "assets/world-portability.js",
+    "src": "world-portability.js"
+  }
+}

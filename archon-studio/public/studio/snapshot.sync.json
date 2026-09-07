@@ -1,0 +1,7 @@
+{
+  "schema": "archon_studio_snapshot_sync_v1",
+  "built_at": "2026-09-07T21:17:16+00:00",
+  "source_signature": "knowledge_base.json:0:0|research_atlas.json:0:0|prediction_database.json:0:0|research_director_history.json:0:0|consensus_database.json:0:0|meta_science_history.json:0:0|atlas_index.json:0:0|atlas_index.jsonl:0:0",
+  "snapshot_revision": "1788815836706186354:3511",
+  "reason": "bridge-startup-stale"
+}

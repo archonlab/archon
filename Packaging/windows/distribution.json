@@ -1,0 +1,27 @@
+{
+  "schema": "archon_windows_build_contract_v1",
+  "milestone": "STUDIO20.5",
+  "version": "1.0.0",
+  "architecture": "x64",
+  "model": "private-python-portable-directory-with-per-user-installer",
+  "root_policy": "explicitly writable; Program Files unsupported",
+  "runtime": "Runtime/python/python.exe",
+  "gui_runtime": "Runtime/python/pythonw.exe",
+  "canonical_entrypoint": "Tools/archon_studio_desktop.py",
+  "whitelist": "Release/STUDIO20.5/packaging_whitelist.txt",
+  "builder": "Tools/archon_windows_distribution.py",
+  "native_builder": "Packaging/windows/build.ps1",
+  "runtime_dependencies": [
+    "Python >=3.12 x64",
+    "Tk/Tcl",
+    "numpy",
+    "Pillow",
+    "sqlite3"
+  ],
+  "runtime_lock": "required exact file hash inventory and human supplied runtime identity",
+  "ordinary_runtime_requires": [
+    "installed browser"
+  ],
+  "artifact": "ARCHON-Studio-1.0.0.exe",
+  "native_acceptance": "NOT_YET_NATIVELY_EXECUTED_ON_WINDOWS"
+}

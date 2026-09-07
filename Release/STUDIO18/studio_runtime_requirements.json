@@ -1,0 +1,50 @@
+{
+  "schema": "archon_studio_runtime_requirements_v2",
+  "studio_version": "STUDIO18",
+  "network": {
+    "listen": "127.0.0.1 only",
+    "default_port": 8765,
+    "internet_required": false
+  },
+  "python": {
+    "minimum": "3.10",
+    "stdlib_only_for_studio_bridge": true
+  },
+  "desktop": {
+    "preferred": "Chromium-family browser with --app mode",
+    "fallback": "system browser + Tk lifecycle window",
+    "browser_required_for_visual_frontend": true
+  },
+  "frontend": {
+    "node_required_at_runtime": false,
+    "vite_required_at_runtime": false,
+    "bundle": "archon-studio/dist"
+  },
+  "research_state": {
+    "bundled": false,
+    "generated_at_runtime": [
+      "archon-studio/public/studio/",
+      "Results/Studio/",
+      "Config/Studio/"
+    ],
+    "missing_atlas_is_valid": true
+  },
+  "platform_launchers": {
+    "linux": "ARCHON_STUDIO.sh",
+    "windows": "ARCHON_STUDIO.bat",
+    "macos": "ARCHON_STUDIO.command",
+    "canonical_entrypoint": "Tools/archon_studio_desktop.py",
+    "shared_runtime_path": true
+  },
+  "platform_runtime": {
+    "engine_launch": "sys.executable + canonical Python entrypoint",
+    "bash_required_by_studio_bridge": false,
+    "linux_shell_launchers": "retained for direct/manual use",
+    "windows_native_engine_launch": true,
+    "macos_native_engine_launch": true,
+    "pause_resume": {
+      "posix": true,
+      "windows": false
+    }
+  }
+}

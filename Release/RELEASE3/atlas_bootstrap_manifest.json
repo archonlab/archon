@@ -1,0 +1,57 @@
+{
+  "schema": "archon_release3_1_atlas_clean_bootstrap_v1",
+  "milestone": "RELEASE3.1-ATLAS-CLEAN-BOOTSTRAP",
+  "status": "PASS",
+  "bootstrap_mode": "DIRECTORIES_ONLY",
+  "bootstrap_directories": [
+    "Atlas/Knowledge/",
+    "Atlas/Worlds/"
+  ],
+  "bootstrap_files": [],
+  "packaged_atlas_state": [],
+  "accumulated_knowledge_files": [
+    "duplicate_rule_aliases.json",
+    "knowledge_base.json",
+    "knowledge_base.md",
+    "knowledge_base_integrity.json",
+    "meta_science_history.json",
+    "prediction_database.json",
+    "prediction_database.md",
+    "reference_control_registry.json",
+    "reference_control_registry.md",
+    "research_atlas.json",
+    "research_atlas.md",
+    "research_director_history.json",
+    "rule_id_allocator.json",
+    "consensus_database.json",
+    "consensus_database.md"
+  ],
+  "schema_ownership": {
+    "mode": "PACKAGED_PYTHON_CODE",
+    "owners": [
+      "archon_paths.py",
+      "Universe_Search/universe_search_v34_closed_research_cycle.py",
+      "Analyzer_next/production/catalog.py",
+      "Analyzer_next/cli/atlas_engine.py",
+      "Analyzer_next/core/reference_control_registry/contracts.py",
+      "Analyzer_next/core/prediction_registry/contracts.py",
+      "Analyzer_next/core/knowledge_base/contracts.py",
+      "Analyzer_next/core/meta_science/contracts.py",
+      "Analyzer_next/research/director/orchestrator.py"
+    ],
+    "missing": []
+  },
+  "first_run_contract": {
+    "old_passports_absent": true,
+    "old_principles_absent": true,
+    "old_predictions_absent": true,
+    "old_consensus_absent": true,
+    "old_experiment_history_absent": true,
+    "old_research_cycle_records_absent": true,
+    "absolute_developer_paths_absent": true,
+    "runtime_owners_create_state_on_demand": true,
+    "existing_install_state_is_never_deleted": true
+  },
+  "blockers": [],
+  "content_hash": "b04f2e760b87d646d06db0acc82cc0699a4d9cb24ff590e4cbf5f794444b755b"
+}

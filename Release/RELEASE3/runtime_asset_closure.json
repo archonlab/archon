@@ -1,0 +1,175 @@
+{
+  "schema": "archon_release3_4_runtime_asset_closure_v1",
+  "milestone": "RELEASE3.4-RUNTIME-ASSET-CLOSURE-TEST",
+  "status": "PASS",
+  "counts": {
+    "packaging_files": 623,
+    "runtime_files": 607,
+    "clean_tree_files": 623,
+    "entrypoints": 3,
+    "executables": 6,
+    "probes": 13,
+    "generated_local_state_files": 2,
+    "blockers": 0
+  },
+  "entrypoints": [
+    "OBSERVER.sh",
+    "ANALYZER.sh",
+    "UNIVERSE SEARCH.sh"
+  ],
+  "executables": [
+    "OBSERVER.sh",
+    "ANALYZER.sh",
+    "UNIVERSE SEARCH.sh",
+    "Tools/archon_release_bootstrap.py",
+    "Tools/diagnose_observer_launcher_2_experiments.py",
+    "Tools/observer_launcher_2_cutover.py"
+  ],
+  "missing_files": [],
+  "extra_files": [],
+  "hash_mismatches": [],
+  "runtime_absolute_paths": [],
+  "syntax_errors": [],
+  "probes": [
+    {
+      "command": [
+        "bash",
+        "-n",
+        "OBSERVER.sh",
+        "ANALYZER.sh",
+        "UNIVERSE SEARCH.sh"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "bash",
+        "UNIVERSE SEARCH.sh",
+        "--help"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "bash",
+        "ANALYZER.sh",
+        "--help"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "python3",
+        "Tools/archon_release_bootstrap.py",
+        "--help"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "python3",
+        "Tools/diagnose_observer_launcher_2_experiments.py",
+        "--help"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "python3",
+        "Tools/observer_launcher_2_cutover.py",
+        "--help"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "python3",
+        "Tools/diagnose_observer_launcher_2_experiments.py",
+        "--project-root",
+        "<CLEAN_ROOT>",
+        "--json"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "python3",
+        "Tools/archon_release_bootstrap.py",
+        "atlas-clean-check"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "python3",
+        "Tools/archon_release_bootstrap.py",
+        "config-clean-check"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "python3",
+        "Tools/observer_launcher_2_cutover.py",
+        "rollback",
+        "--to",
+        "modular-v1"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "bash",
+        "OBSERVER.sh",
+        "--profile-status"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-c",
+        "import archon_paths; import Analyzer_next.cli.observer_launcher_2; import Analyzer_next.production.coordinator; import Observer.observer_launcher; import Universe_Search.search_launcher; from Analyzer_next.execution.observer.shell2.metrics import load_default_metric_definitions; assert len(load_default_metric_definitions()) == 6"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-c",
+        "import sqlite3; from Storage.sqlite_schema import initialize_database as initialize_storage; from Analyzer_next.adapters.telemetry.schema_manager import initialize_database as initialize_telemetry; a=sqlite3.connect(':memory:'); initialize_storage(a); a.close(); b=sqlite3.connect(':memory:'); initialize_telemetry(b); b.close()"
+      ],
+      "returncode": 0,
+      "output": ""
+    }
+  ],
+  "generated_local_state_files": [
+    "Config/ObserverLauncher/launcher_profile.json",
+    "Config/ObserverLauncher/ui_preferences.json"
+  ],
+  "blockers": [],
+  "policy": {
+    "whitelist_only_materialization": true,
+    "source_bytes_preserved": true,
+    "working_tree_unmodified_by_probes": true,
+    "missing_assets_fail_closed": true,
+    "absolute_developer_paths_fail_closed": true,
+    "missing_executables_fail_closed": true,
+    "runtime_outputs_confined_to_local_state": true,
+    "interactive_stdin_disabled_for_probes": true
+  },
+  "content_hash": "80f233da750fb93d4f4c3fd77cb6eb8c37bd029a07f96024dc92c3b9182350fb",
+  "closure_hash": "ca99eca8739362855fb16b406c164e376ca271da85fcfdfec0c156226cf5bdfe"
+}

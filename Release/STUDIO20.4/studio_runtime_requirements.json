@@ -1,0 +1,57 @@
+{
+  "desktop": {
+    "browser_required_for_visual_frontend": true,
+    "fallback": "system browser + Tk lifecycle window",
+    "preferred": "Chromium-family browser with --app mode"
+  },
+  "distribution": {
+    "contract": "Packaging/distribution_contract.json",
+    "single_release_tree": true,
+    "stage_builder": "Tools/archon_distribution_stage.py",
+    "target_artifacts": {
+      "linux": "ARCHON-Studio-1.0.0.AppImage",
+      "macos": "ARCHON-Studio-1.0.0.dmg",
+      "windows": "ARCHON-Studio-1.0.0.exe"
+    }
+  },
+  "frontend": {
+    "bundle": "archon-studio/dist",
+    "node_required_at_runtime": false,
+    "vite_required_at_runtime": false
+  },
+  "network": {
+    "default_port": 8765,
+    "internet_required": false,
+    "listen": "127.0.0.1 only"
+  },
+  "platform_launchers": {
+    "canonical_entrypoint": "Tools/archon_studio_desktop.py",
+    "linux": "ARCHON_STUDIO.sh",
+    "macos": "ARCHON_STUDIO.command",
+    "shared_runtime_path": true,
+    "windows": "ARCHON_STUDIO.bat"
+  },
+  "python": {
+    "bundled_runtime_root": "Runtime/python",
+    "child_interpreter_contract": "Tools/archon_runtime_python.py",
+    "environment_override": "ARCHON_RUNTIME_PYTHON",
+    "minimum": "3.12",
+    "stdlib_only_for_studio_bridge": true
+  },
+  "research_state": {
+    "bundled": false,
+    "generated_at_runtime": [
+      "archon-studio/public/studio/",
+      "Results/Studio/",
+      "Config/Studio/"
+    ],
+    "missing_atlas_is_valid": true
+  },
+  "schema": "archon_studio_runtime_requirements_v3",
+  "source_tree_policy": {
+    "corrupt_provenance": "FAIL_CLOSED",
+    "modified_local_sources": "WARN_AND_CONTINUE",
+    "sealed_match": "VERIFIED"
+  },
+  "studio_version": "STUDIO20.4"
+}
