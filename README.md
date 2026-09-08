@@ -1,3 +1,50 @@
+## ARCHON Studio
+
+ARCHON Studio is the main visual workspace for exploring the current research state. It brings together worlds, rules, experiments, evidence, mechanisms, predictions, search tools, and observation workflows in one interface.
+
+![ARCHON Studio research overview](Documentation/images/studio-overview.png)
+
+The interface includes both dark and light themes.
+
+![ARCHON Studio light theme](Documentation/images/studio-light-theme.png)
+
+### Research Feed
+
+Research Feed presents important scientific results in a human-readable form. It highlights validated emergence candidates, discoveries, evidence updates, mechanisms, predictions, and other notable changes produced during research.
+
+### World Atlas
+
+The World Atlas provides a visual catalogue of retained computational worlds. Each entry combines a preview with its rule, Atlas score, and selected measurements, making promising worlds easier to compare and inspect.
+
+![ARCHON Studio World Atlas](Documentation/images/studio-worlds.png)
+
+### Studio Observer
+
+The integrated Observer provides a quick visual preview of how a retained rule behaves. A rule can be paused, stopped, or handed over to the full Observer Launcher for a reviewed native observation.
+
+![ARCHON Studio Observer](Documentation/images/studio-observer.png)
+
+## ARCHON Observer
+
+ARCHON Observer is the dedicated environment for running and reviewing computational worlds. It combines live visualization, measurable observables, run controls, experiment management, and result analysis.
+
+### Live Observation
+
+The Observation workspace displays a running or completed world alongside scientific measurements such as object count, living mass, colony size, ecosystem health, stability, and life evidence.
+
+![ARCHON Observer live observation](Documentation/images/observer-observation.png)
+
+### Experiment Queue
+
+The Queue manages planned, running, and completed observations. It records the associated world, run identifier, provenance, execution settings, telemetry, status, and output location for every reviewed run.
+
+![ARCHON Observer experiment queue](Documentation/images/observer-queue.png)
+
+## Universe Search
+
+Universe Search is the launcher for computational exploration. It provides search-mode configuration, research-job selection, progress tracking, checkpoint recovery, worker status, and access to generated run data.
+
+![Project ARCHON Universe Search](Documentation/images/universe-search.png)
 # Project ARCHON
 
 ARCHON is a local scientific-research system for exploring computational
