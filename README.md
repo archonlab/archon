@@ -338,6 +338,9 @@ Platform packaging scaffolding lives under `Packaging/`, with a shared staging
 builder in `Tools/archon_distribution_stage.py`. It is intended for release
 engineering with a complete redistributable Python runtime; it is not required
 to run this source release.
+For more operational detail, see `Docs/ARCHON_STUDIO_GUIDE.md` and
+`Docs/WORLD1_PORTABLE_WORLDS.md`, while treating the actual shipped launchers and
+runtime contracts as authoritative when older notes differ
 
 Project ARCHON's first-party materials are available under the GNU Affero
 General Public License, version 3 only (`AGPL-3.0-only`). See `LICENSE` for the
@@ -351,6 +354,4 @@ version 3 only (AGPL-3.0-only).
 in `Documentation/THIRD_PARTY_NOTICES.md`. Commercial licensing is described in
 `Documentation/COMMERCIAL_LICENSE.md`.
 
-For more operational detail, see `Docs/ARCHON_STUDIO_GUIDE.md` and
-`Docs/WORLD1_PORTABLE_WORLDS.md`, while treating the actual shipped launchers and
-runtime contracts as authoritative when older notes differ.
+.
