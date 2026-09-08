@@ -1,3 +1,20 @@
+# Project ARCHON
+
+ARCHON is a local scientific-research system for exploring computational
+“worlds”: evolving rules generate dynamic fields, promising worlds are retained,
+Observer records what happens, and Analyzer turns observations and experiments
+into structured evidence, mechanisms, and testable predictions.
+
+The project is designed to keep an explicit research chain:
+
+```text
+World → Rule → Experiment → Evidence → Mechanism → Prediction
+```
+
+ARCHON studies candidates and competing explanations; a striking visual pattern
+is not treated as proof by itself. Canonical records and provenance remain the
+source of truth throughout the workflow.
+
 ## ARCHON Studio
 
 ARCHON Studio is the main visual workspace for exploring the current research state. It brings together worlds, rules, experiments, evidence, mechanisms, predictions, search tools, and observation workflows in one interface.
@@ -45,22 +62,6 @@ The Queue manages planned, running, and completed observations. It records the a
 Universe Search is the launcher for computational exploration. It provides search-mode configuration, research-job selection, progress tracking, checkpoint recovery, worker status, and access to generated run data.
 
 ![Project ARCHON Universe Search](Documentation/images/universe-search.png)
-# Project ARCHON
-
-ARCHON is a local scientific-research system for exploring computational
-“worlds”: evolving rules generate dynamic fields, promising worlds are retained,
-Observer records what happens, and Analyzer turns observations and experiments
-into structured evidence, mechanisms, and testable predictions.
-
-The project is designed to keep an explicit research chain:
-
-```text
-World → Rule → Experiment → Evidence → Mechanism → Prediction
-```
-
-ARCHON studies candidates and competing explanations; a striking visual pattern
-is not treated as proof by itself. Canonical records and provenance remain the
-source of truth throughout the workflow.
 
 ## ARCHON Studio
 
