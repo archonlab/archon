@@ -343,6 +343,11 @@ Project ARCHON's first-party materials are available under the GNU Affero
 General Public License, version 3 only (`AGPL-3.0-only`). See `LICENSE` for the
 complete controlling text and `Documentation/LICENSE.md` for the project-wide
 scope notice. Third-party components retain their respective licenses as listed
+
+Copyright © 2026 Sergii Derebchynskyi.
+
+Licensed under the GNU Affero General Public License,
+version 3 only (AGPL-3.0-only).
 in `Documentation/THIRD_PARTY_NOTICES.md`. Commercial licensing is described in
 `Documentation/COMMERCIAL_LICENSE.md`.
 
