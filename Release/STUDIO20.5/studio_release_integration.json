@@ -1,8 +1,8 @@
 {
   "base_release": "STUDIO20.4",
   "counts": {
-    "packaging_files": 745,
-    "runtime_files": 625
+    "packaging_files": 749,
+    "runtime_files": 626
   },
   "file_hashes": {
     "ANALYZER.sh": "b6e9d0c6f562d2e1ebe051fea1bc93468aedb783cfb1f128cd6efb50f5e6a7a9",
@@ -552,6 +552,7 @@
     "Docs/Audits/2026-09-06/reproduce/test_mechanism_zero_values.py": "375114af0583da4e23a9d0aed5886b71f4f1884bca53bfa1d2c8b5fc6169eeb4",
     "Docs/Audits/2026-09-06/reproduce/test_sciencefix2_value_semantics.py": "00e41bba982dfae975444fd7f1c6c294c8bf406b8479a2e4dbdaa1cac1597de7",
     "Docs/Audits/2026-09-06/reproduce/test_source_tree_seal_policy.py": "e22fbc84925c30713b405f1fbd60c27c929cfe9ecb9996dc79727637b30ac998",
+    "Docs/Audits/2026-09-09/STUDIO20_5_REAL_SEARCH_RELEASE.md": "d1bc45a1b9928b2ba4bfbfa5882d562f49afc06a5f63908d679bd48215d0360d",
     "Docs/STUDIO20/BUILD_AND_ACCEPTANCE.md": "16f75629e8edaa3733e6655dc6fe61d0e2275f353a4378d5d49c71c1166eda41",
     "Docs/STUDIO20/WINDOWS_AUDIT.md": "52b79a36f511bd60a8a694b6b109e2c6809efd609685bf706cd920f48710af24",
     "Docs/WORLD1_PORTABLE_WORLDS.md": "2876fc2a99567fed47a9bcec4cab4c22702e1acec05fbe7fbceac40540a97bce",
@@ -661,9 +662,9 @@
     "Release/STUDIO20.4/studio_runtime_requirements.json": "19cb0cdcd59915768811414b86fd1429faaac5e62b12dc335092a858ab26cb43",
     "Release/STUDIO20.5/asset_whitelist.txt": "e9d73e7b2468524b1f663c528240e8ad52dece7195a37aee33724a11e458c22c",
     "Release/STUDIO20.5/bootstrap_whitelist.txt": "9e9fdc992823cdf8c46cf2f672024b21fd80e9386067aa36c2c8c084eb763ec2",
-    "Release/STUDIO20.5/packaging_whitelist.txt": "97aff54a8cea59596e0859cbf0f6a8ba112e19d0280024ce95f9c0e33dc5e84e",
-    "Release/STUDIO20.5/runtime_whitelist.txt": "b4a92aa717454843092034db172d7d6a076e32efe7de3d8a59fcc51b04e006fd",
-    "Release/STUDIO20.5/studio_runtime_requirements.json": "4fd1b3ab54271bb9ae0052c98d092d153776da4b1d93cc24e27ae0359a84b0d1",
+    "Release/STUDIO20.5/packaging_whitelist.txt": "27de8d5bac2aacabd9beee188869f1b482bc060a37af0c37c9fb911197f11a0c",
+    "Release/STUDIO20.5/runtime_whitelist.txt": "bbf13e5b19088b16e873631e2b87a7e7ed23b206555105aef12694b1dbdcee58",
+    "Release/STUDIO20.5/studio_runtime_requirements.json": "6fe0803d58f1df317cc8639252f84d49f5fc8c4d63d972392b930a8685c3366e",
     "Release/STUDIO20/asset_whitelist.txt": "2ec836a39ae48f37655b13b044dbe82516bb255b343a4456d1b357e8030e9a4b",
     "Release/STUDIO20/bootstrap_whitelist.txt": "9e9fdc992823cdf8c46cf2f672024b21fd80e9386067aa36c2c8c084eb763ec2",
     "Release/STUDIO20/packaging_whitelist.txt": "e5ca9145e39d0c369521ece6dbf8e82a74e2d623317a367cf887c921a38a0bdf",
@@ -703,7 +704,7 @@
     "Tools/archon_studio_desktop.py": "0cedbccedbc53fd8141b23595eec19c29c4c1e06b9b3e98ffd153e58d5814aeb",
     "Tools/archon_studio_observer_adapter.py": "fb6b9312c3d603f65e82b24d03120707b95e50eebb781d036ace1081dd4c1bd4",
     "Tools/archon_studio_observer_launcher_adapter.py": "c2e318754b248dad976b0c431248a51b145e921b3d5cba2170aff9886be400d2",
-    "Tools/archon_studio_runtime.py": "b35f2adfe8986839df09a25118677036b3f846aaa564184a2b674b183047a84c",
+    "Tools/archon_studio_runtime.py": "cd1f92e7356391756673657186ce848e715d92fa73b1508f89f652128c99deb1",
     "Tools/archon_studio_snapshot.py": "b3de1a758449a583947632c1e55a7afbc1e4aa6c70226c9724bbe57d2a60c60f",
     "Tools/archon_windows_distribution.py": "cfd6fdfc1c8587636de1eb1b03afa80a6c608bb0de88bf3cbad0a48a1826d0d0",
     "Tools/archon_windows_launch.py": "8381e3325f5302f8f82bfbb5cf891c04bc9996a601ddcca6617d7521b67ec089",
@@ -711,15 +712,17 @@
     "Tools/diagnose_observer_launcher_2_experiments.py": "78ca16a843fa55a85fd42b4323932b9d66cfaf742adb670f4e4991be7fabaa7a",
     "Tools/observer_launcher_2_cutover.py": "2023f5d7c952bbd278ab9c499747c57cd4d90aeb1ad9b92bca030184eac96a41",
     "Tools/verify_ol2_ux_fix.py": "cb608ffdf21280e05c57b419becfffc6feb9ed1142feee74cad946fb2274cc0f",
+    "Tools/verify_search_launcher_small_screen.py": "a9ba9c6b6d6f09a0299ed9a31eb8d2a5fade0181176cdc6a5c549a72faffcfb8",
     "Tools/verify_studio18_platform_portability.py": "e3bddeda3b6f61c0ae23c5d6f0ab31fc3350dacb24ce7885bfcefdee0fed7356",
     "Tools/verify_studio19_distribution_foundation.py": "1fdc94a15bf576a684bd0f56e845e68821c7638591d9aeaf81a0226a58de5cba",
     "Tools/verify_studio20_1_scientific_semantics.py": "7f0f650a3ef18508bf282734a40dcd9157de548a4227b3c4f4277a7d8fbdc9bb",
     "Tools/verify_studio20_2_sciencefix2.py": "535d71eeb601012d2010bfd29cbcc28f521feb519578ba087c47c6522fde791c",
     "Tools/verify_studio20_3_source_policy.py": "fcfaec894f91a60f5115e64161b4b029149ce6abd818c8baf7b9d24beda16151",
     "Tools/verify_studio20_4_search_ux.py": "c7499f6adc6424a8f98dc70f262df4e7113090c718e805dccfe091ecf851fe21",
-    "Tools/verify_studio20_5_world1.py": "8fe1af0f3bd56ebc1d29a42532df29c830066bdaaa42a0abe86c595935d27ecb",
+    "Tools/verify_studio20_5_world1.py": "5c3a26f8b71a101753d896dad7a7b53989009c60e6c9fc1c9eada6d750880aad",
     "Tools/verify_studio20_windows_distribution.py": "6ca9f6524bc45d43e2e7d13f8ff382f8f5c534a8e2c0c3829074ef25b2cba5cd",
-    "Tools/verify_world1_portability.py": "1ba1997cfc3f277c78a4ff3e6aaf022a9687a4c3a1968bfb27d33d86538fd063",
+    "Tools/verify_studio_real_search_release.py": "781cafa6b38c1e49b9b7619dc7d64ecf9d2450302926beeca13f974300c3617c",
+    "Tools/verify_world1_portability.py": "2b90211c69e01967932d8404dccd11e77e83adecd87ef3c3d8a7bed36fd4e71f",
     "UNIVERSE SEARCH.sh": "4140a9a18e337312298ceebe17f77a0473e0a1999bff74e6e9db43a2b691da0d",
     "Universe_Search/__init__.py": "535417505718405e67c04b042e1bd19ee9915756ed86a349e7a68573f0220994",
     "Universe_Search/discovery_engine.py": "78c32e9f279f161810c768730d37444a449c3f94dc3061881758c6a47794a919",
@@ -734,11 +737,12 @@
     "Universe_Search/scientific_state.py": "cb16dce3f33d6a64db624c703898a899aecce66c8071751038ba2be545c1b5fa",
     "Universe_Search/scientific_state_builder.py": "0ccc7b7f0019b0cd49a07fcc2407810c1fdc62eeee62df6b2de1a854c8ed8890",
     "Universe_Search/search_job_loader.py": "8c5a8cc3f292ca794a5a3a7bcc5504eca6b4cfb0f5c23932894b5f98eee6c562",
-    "Universe_Search/search_launcher.py": "e62b413bcad820a16cd1b5dcd7e9d36705e7260db9313d9a7ecca82a5b9bc552",
+    "Universe_Search/search_launcher.py": "39cd91d31ae57308f6ac08a4657c11fdb6c319fb1a7853ea2bd91e2fd97cacf2",
+    "Universe_Search/search_runtime_contract.py": "8cd4e4852f43c0e2c9ffd1e47eaa224876296ed1a6f91605d06d0c93a8411e9f",
     "Universe_Search/target_scoring.py": "a8541917a1cf441bf52cec8b21657694e7ffec691359b28c5e270153a431910a",
     "Universe_Search/theory_engine.py": "2c3e1d2428a483e2dee03547ff1aeb9483a7a2b2111af5208ebc9d0f8ef75c0a",
     "Universe_Search/universe_search_core.py": "f2a715465c9506dc63a4317b3de22049f1c55719b2c87a7eacfb16a693ac871b",
-    "Universe_Search/universe_search_v34_closed_research_cycle.py": "e5cb4aa023588e008c088d217aea21c5ec719e05760ced0eeb075c3028e87476",
+    "Universe_Search/universe_search_v34_closed_research_cycle.py": "9c7181794257b1b82a6e936e0c80009fe21c43a2565e8242a4e180a19ea9f4cf",
     "World_Portability/__init__.py": "ce608b7dac83039e717fa1a8850b357426acd0321adf46e8c3eee1cbed6857d6",
     "World_Portability/service.py": "0cb99dab6eb56036656e44d10ed08c2e2601320999b301458b1f831ab60ee054",
     "archon-studio/dist/archon-studio-build.json": "4ad8f35b93e9fe7e93686f58a7e9e5ff1744c878f129af7e8b55cdd05e8ab172",
@@ -751,15 +755,36 @@
     "archon_paths.py": "c0c6a3a3798ebb304d4d94fdfc72b5889bdcae6378aa72765b0e0c0882a5118e"
   },
   "native_windows": "NOT_YET_NATIVELY_EXECUTED_ON_WINDOWS",
+  "real_universe_search_release": {
+    "canonical_entrypoint": "Universe_Search/universe_search_v34_closed_research_cycle.py",
+    "clean_stage_real_generation_regression": "Tools/verify_studio_real_search_release.py",
+    "generation_artifact_validation": true,
+    "missing_runtime_policy": "FAIL_CLOSED",
+    "shared_launch_contract": "Universe_Search/search_runtime_contract.py",
+    "simulation_fallback": false,
+    "telemetry": "PID-bound archon_search_runtime_v1 process stdout"
+  },
   "schema": "archon_studio20_5_world1_integration_v1",
   "scientific_semantics": {
     "analyzer_scientific_semantics_modified": false,
     "experiment_semantics_modified": false,
     "observer_scientific_semantics_modified": false,
     "universe_search_allocation_infrastructure_modified": true,
-    "universe_search_modified": false
+    "universe_search_modified": true,
+    "universe_search_scientific_semantics_modified": false
   },
-  "scope": "portable_world_identity_single_and_collection_import_export",
+  "scope": "portable_worlds_plus_small_screen_search_launcher_plus_real_release_universe_search",
+  "search_launcher_layout": {
+    "action_area": "sticky-below-scroll-viewport",
+    "desktop_default": "1180x820-when-screen-allows",
+    "minimum_window": "900x460",
+    "primary_content": "vertical-scroll-when-required",
+    "themes_verified": [
+      "light",
+      "dark"
+    ],
+    "universe_search_scientific_semantics_modified": false
+  },
   "source_tree_policy": {
     "corrupt_provenance": "FAIL_CLOSED",
     "modified_local_sources": "WARN_AND_CONTINUE"

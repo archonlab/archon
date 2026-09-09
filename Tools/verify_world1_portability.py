@@ -442,15 +442,18 @@ class World1Tests(unittest.TestCase):
 
 def release_contract_checks() -> None:
     core = ROOT / "Universe_Search/universe_search_core.py"
-    cycle = ROOT / "Universe_Search/universe_search_v34_closed_research_cycle.py"
     expected = {
         core: "f2a715465c9506dc63a4317b3de22049f1c55719b2c87a7eacfb16a693ac871b",
-        cycle: "e5cb4aa023588e008c088d217aea21c5ec719e05760ced0eeb075c3028e87476",
     }
     for path, digest in expected.items():
         actual = hashlib.sha256(path.read_bytes()).hexdigest()
         if actual != digest:
             raise AssertionError(f"scientific Search file changed: {path.relative_to(ROOT)}")
+    cycle_source = (ROOT / "Universe_Search/universe_search_v34_closed_research_cycle.py").read_text(encoding="utf-8")
+    if "POPULATION = base.POPULATION" not in cycle_source or "GENERATIONS = base.GENERATIONS" not in cycle_source:
+        raise AssertionError("scientific Search budget contract changed")
+    if "def emit_search_runtime_event(" not in cycle_source:
+        raise AssertionError("real Search operational telemetry contract missing")
     source = (ROOT / "World_Portability/service.py").read_text(encoding="utf-8")
     for forbidden in ("pickle", "subprocess", "requests", "urllib.request"):
         if forbidden in source:

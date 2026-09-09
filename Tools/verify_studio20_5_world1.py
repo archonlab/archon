@@ -34,8 +34,14 @@ def run(*args: object, cwd: Path = ROOT, timeout: int = 300) -> str:
 
 
 def main() -> int:
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from Universe_Search.search_runtime_contract import REQUIRED_RUNTIME_FILES
+
     run(sys.executable, "-B", ROOT / "Tools/verify_world1_portability.py")
     run(sys.executable, "-B", ROOT / "Tools/verify_ol2_ux_fix.py")
+    run(sys.executable, "-B", ROOT / "Tools/verify_search_launcher_small_screen.py")
+    run(sys.executable, "-B", ROOT / "Tools/verify_studio_real_search_release.py", timeout=300)
     for rel in [
         "Docs/Audits/2026-09-06/reproduce/test_source_tree_seal_policy.py",
         "Docs/Audits/2026-09-06/reproduce/test_mechanism_zero_values.py",
@@ -49,9 +55,12 @@ def main() -> int:
     require('"active_profile": "ol2"' in headless, "Observer OL2 headless runtime regressed")
 
     listed = rows(WHITELIST)
+    runtime_listed = set(rows(ROOT / "Release/STUDIO20.5/runtime_whitelist.txt"))
     require(listed == sorted(listed), "packaging whitelist is not sorted")
     require(len(listed) == len(set(listed)), "packaging whitelist contains duplicates")
     require(all((ROOT / rel).is_file() for rel in listed), "packaging whitelist references a missing file")
+    require(set(REQUIRED_RUNTIME_FILES) <= set(listed), "canonical Search closure missing from packaging whitelist")
+    require(set(REQUIRED_RUNTIME_FILES) <= runtime_listed, "canonical Search closure missing from runtime whitelist")
     for rel in listed:
         parts = Path(rel).parts
         require("__pycache__" not in parts and ".git" not in parts and ".agents" not in parts, f"development/cache leak: {rel}")

@@ -616,6 +616,7 @@ Universe_Search/scientific_state.py
 Universe_Search/scientific_state_builder.py
 Universe_Search/search_job_loader.py
 Universe_Search/search_launcher.py
+Universe_Search/search_runtime_contract.py
 Universe_Search/target_scoring.py
 Universe_Search/theory_engine.py
 Universe_Search/universe_search_core.py

@@ -156,6 +156,7 @@ _reference_control_cache = None
 _genome_registry_cache = None
 SEARCH_RUN_ID = f"search_{int(time.time())}_{os.getpid()}"
 RUN_HISTORY_DIR = OUT_DIR / 'search_runs' / SEARCH_RUN_ID
+SEARCH_RUNTIME_PREFIX = 'ARCHON_SEARCH_RUNTIME_JSON='
 
 PARALLEL = True
 WORKERS = max(1, min(6, (os.cpu_count() or 2) // 2 or 1))
@@ -244,6 +245,18 @@ OBSERVER_ELITES = base.OBSERVER_ELITES
 
 def now_s():
     return time.strftime('%H:%M:%S')
+
+
+def emit_search_runtime_event(event, **fields):
+    """Emit PID-bound operational telemetry without affecting Search science."""
+    payload = {
+        'schema': 'archon_search_runtime_v1',
+        'event': str(event),
+        'pid': os.getpid(),
+        'search_run_id': SEARCH_RUN_ID,
+        **fields,
+    }
+    print(SEARCH_RUNTIME_PREFIX + json.dumps(payload, sort_keys=True), flush=True)
 
 
 def configure_base_paths():
@@ -3271,6 +3284,13 @@ def run_evolution(score_mode='observer_niches', resume=False, search_config=None
     load_information_cache()
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     ATLAS_DIR.mkdir(parents=True, exist_ok=True)
+    emit_search_runtime_event(
+        'process_started',
+        entrypoint='Universe_Search/universe_search_v34_closed_research_cycle.py',
+        population=POPULATION,
+        generations=GENERATIONS,
+        score_mode=score_mode,
+    )
 
     research_plan = load_research_bridge_plan()
     if research_cycle is not None and hasattr(research_cycle, 'apply_cycle_to_research_plan'):
@@ -3663,6 +3683,12 @@ def run_evolution(score_mode='observer_niches', resume=False, search_config=None
         # Keep immutable run-scoped copies; root mirrors remain for legacy tools.
         atomic_write_json(RUN_HISTORY_DIR / f'generation_{gen:02d}_{score_mode}.json', payload, indent=2)
         atomic_write_json(RUN_HISTORY_DIR / f'best_{score_mode}.json', {'score': best_ever[0], 'rule': base.rule_to_dict(best_ever[1]), 'metrics': best_ever[2]}, indent=2)
+        emit_search_runtime_event(
+            'generation_committed',
+            generation=gen,
+            results=len(payload),
+            artifact=(RUN_HISTORY_DIR / f'generation_{gen:02d}_{score_mode}.json').relative_to(PROJECT_ROOT).as_posix(),
+        )
 
         add_to_atlas(gen, score_mode, select_atlas_items(clean_results, score_mode))
         diversity_skeleton = update_diversity_skeleton(diversity_skeleton, clean_results, gen)
@@ -3758,6 +3784,7 @@ def run_evolution(score_mode='observer_niches', resume=False, search_config=None
         print('Search paused with checkpoint preserved.')
     else:
         print('Search complete.')
+        emit_search_runtime_event('search_complete')
         if target_scoring_active and target_generation_summaries:
             target_outcome = target_scoring.finalize_search_outcome(
                 target_generation_summaries,

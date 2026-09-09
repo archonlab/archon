@@ -47,6 +47,15 @@
     ],
     "missing_atlas_is_valid": true
   },
+  "universe_search": {
+    "canonical_entrypoint": "Universe_Search/universe_search_v34_closed_research_cycle.py",
+    "shared_launch_contract": "Universe_Search/search_runtime_contract.py",
+    "missing_runtime_policy": "FAIL_CLOSED",
+    "simulation_fallback": false,
+    "telemetry_schema": "archon_search_runtime_v1",
+    "telemetry_pid_bound": true,
+    "generation_artifact_verified": true
+  },
   "schema": "archon_studio_runtime_requirements_v3",
   "source_tree_policy": {
     "corrupt_provenance": "FAIL_CLOSED",
