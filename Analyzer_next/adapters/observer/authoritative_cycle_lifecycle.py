@@ -74,7 +74,16 @@ class ObserverAuthoritativeCycleLifecycle:
         runtime_id = _runtime_id(item)
         if not runtime_id:
             return None
-        return find_authoritative_cycle(self.paths, runtime_id=runtime_id)
+        record = find_authoritative_cycle(self.paths, runtime_id=runtime_id)
+        if record is not None and not record.get("lifecycle_state"):
+            # BRIDGE5.8 owns only receipt-backed lifecycle projections.  A
+            # legacy v2 closure record can share the same source runtime with
+            # a later, independently authorized execution attempt, but it has
+            # no append-only lifecycle to reopen or advance.  Treating its
+            # legacy current_stage (commonly COMPLETED) as a live lifecycle
+            # state incorrectly blocks the fresh Queue run.
+            return None
+        return record
 
     def _reference_for_attempt(self, item: Any, *, kind: str) -> dict[str, Any]:
         execution = _execution(item)
@@ -115,7 +124,11 @@ class ObserverAuthoritativeCycleLifecycle:
                     # Ad-hoc or legacy experimental rows stay outside the
                     # authoritative production-cycle contract.
                     continue
-                state = str(record.get("lifecycle_state") or record.get("current_stage") or "")
+                state = str(record.get("lifecycle_state") or "")
+                if not state:
+                    # Legacy closure records are immutable evidence, not
+                    # BRIDGE5.8 lifecycle owners for later execution attempts.
+                    continue
                 if state in {"QUEUED", "RUNNING", "OBSERVED", "ANALYZED", "EVIDENCE_UPDATED", "SCIENCE_REFRESHED", "DIRECTOR_REFRESHED", "CLOSED", "NON_DIAGNOSTIC"}:
                     continue
                 if state != "MATERIALIZED":
@@ -232,7 +245,7 @@ class ObserverAuthoritativeCycleLifecycle:
                 continue
             try:
                 record = find_authoritative_cycle(self.paths, runtime_id=rid)
-                if record is None:
+                if record is None or not record.get("lifecycle_state"):
                     continue
                 state = str(record.get("lifecycle_state") or record.get("current_stage") or "")
                 if state in {"OBSERVED", "FAILED", "CANCELLED", "BLOCKED", "CLOSED", "NON_DIAGNOSTIC"}:
