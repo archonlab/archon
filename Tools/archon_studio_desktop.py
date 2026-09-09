@@ -35,7 +35,7 @@ if str(TOOLS) not in sys.path:
 
 import archon_studio_bundle as bundle  # noqa: E402
 import archon_studio_runtime as runtime  # noqa: E402
-from archon_runtime_python import runtime_python_command  # noqa: E402
+from archon_runtime_python import runtime_python_command, runtime_python_environment  # noqa: E402
 
 STUDIO_VERSION = "STUDIO20.5"
 DEFAULT_HOST = "127.0.0.1"
@@ -67,6 +67,7 @@ def _prepare_snapshot(root: Path, *, quiet: bool = False) -> None:
     result = subprocess.run(
         command,
         cwd=root,
+        env=runtime_python_environment(root),
         text=True,
         stdout=subprocess.PIPE if quiet else None,
         stderr=subprocess.STDOUT if quiet else None,

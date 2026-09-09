@@ -5,8 +5,9 @@ from dataclasses import dataclass
 import os
 from pathlib import Path
 import subprocess
-import sys
 from typing import Any, Mapping
+
+from Tools.archon_runtime_python import runtime_python_command, runtime_python_environment
 
 from Analyzer_next.production.alias_canonicalization import (
     canonicalize_declared_alias_outputs,
@@ -121,7 +122,7 @@ def _step_key(step: Any) -> str:
 
 
 def _execution_environment(paths: ExecutionPaths) -> dict[str, str]:
-    environment = os.environ.copy()
+    environment = runtime_python_environment(paths.project_root)
     environment["PYTHONPATH"] = os.pathsep.join(
         value
         for value in (
@@ -198,7 +199,7 @@ def run_step(
         dag.flush()
         return True
 
-    command = [sys.executable, str(path), *step.args]
+    command = [*runtime_python_command(paths.project_root), str(path), *step.args]
     print("\n" + "=" * 72)
     print("Running:", step.label)
     print("=" * 72)

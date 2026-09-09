@@ -174,6 +174,7 @@ class World1Tests(unittest.TestCase):
     def test_search_allocator_and_import_share_the_canonical_id_convention(self):
         add_world(self.a, rule(42))
         env = dict(os.environ)
+        env["ARCHON_RESULTS_DIR"] = str(self.b / "Results/Universe_Search")
         env["ARCHON_WORLD_ATLAS_DIR"] = str(self.b / "Atlas/Worlds")
         env["ARCHON_KNOWLEDGE_ATLAS_DIR"] = str(self.b / "Atlas/Knowledge")
         script = (
@@ -443,7 +444,7 @@ class World1Tests(unittest.TestCase):
 def release_contract_checks() -> None:
     core = ROOT / "Universe_Search/universe_search_core.py"
     expected = {
-        core: "f2a715465c9506dc63a4317b3de22049f1c55719b2c87a7eacfb16a693ac871b",
+        core: "b5d34086d678f9f899f32ffcea881a241d5655de422e6714135d2fa7ebe53227",
     }
     for path, digest in expected.items():
         actual = hashlib.sha256(path.read_bytes()).hexdigest()

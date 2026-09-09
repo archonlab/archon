@@ -1426,6 +1426,11 @@ def evaluate_one_worker(args):
     try:
         score, metrics, _ = base.score_rule(rule, internal_mode)
         metrics['eval_error'] = None
+        metrics['evaluation_status'] = 'EVALUATED'
+    except base.FieldBackendError:
+        # A backend/runtime failure invalidates the evaluator, not the candidate.
+        # Let the parent abort Search without producing low-score evidence.
+        raise
     except Exception as e:
         metrics = {
             'active': 0.0, 'edge': 0.0, 'boundary_activity': 0.0, 'islands': 0,
@@ -1433,6 +1438,7 @@ def evaluate_one_worker(args):
             'memory_trace_score': 0.0, 'cosmic_recovery': 0.0,
             'degeneracy_penalty': 999.0, 'degeneracy_penalty_raw': 999.0,
             'eval_error': repr(e),
+            'evaluation_status': 'CANDIDATE_ERROR',
         }
         metrics.update(empty_crystal_metrics('skipped because score_rule failed'))
         return idx, -1e9, base.rule_to_dict(rule), metrics
@@ -1571,6 +1577,10 @@ def evaluate_population(population, internal_mode, workers=WORKERS):
                 completed += 1
                 try:
                     out.append(fut.result())
+                except base.FieldBackendError:
+                    # Do not convert evaluator infrastructure failure into a
+                    # partial generation or a scientific candidate failure.
+                    raise
                 except Exception as e:
                     failed += 1
                     print(
@@ -3279,6 +3289,9 @@ def run_evolution(score_mode='observer_niches', resume=False, search_config=None
     PAUSE_REQUESTED = False
     os.environ['UNIVERSE_SEARCH_MAIN_PID'] = str(MAIN_PID)
     configure_base_paths()
+    # Must precede caches, Atlas directories, IDs and checkpoints. A dependency
+    # failure is an infrastructure stop and must leave no scientific mutation.
+    base.require_field_backend()
     load_crystal_cache()
     load_organism_cache()
     load_information_cache()
@@ -3912,6 +3925,15 @@ def main():
             print('[SearchMode] launch refused: fix the configuration above.')
             return 2
 
+    if mode in ('evolve', 'search', 'resume'):
+        try:
+            base.require_field_backend()
+        except base.FieldBackendError as exc:
+            print('[DEPENDENCY_ERROR] Universe Search evaluator is unavailable.')
+            print(f'Python runtime: {sys.executable}')
+            print(str(exc))
+            return 2
+
     if mode in ('evolve', 'search'):
         try:
             run_evolution(
@@ -3919,6 +3941,11 @@ def main():
                 resume=False,
                 search_config=search_config,
             )
+        except base.FieldBackendError as exc:
+            print('[DEPENDENCY_ERROR] Universe Search evaluator is unavailable.')
+            print(f'Python runtime: {sys.executable}')
+            print(str(exc))
+            return 2
         finally:
             save_crystal_cache()
             save_organism_cache()
@@ -3931,6 +3958,11 @@ def main():
                 resume=True,
                 search_config=search_config,
             )
+        except base.FieldBackendError as exc:
+            print('[DEPENDENCY_ERROR] Universe Search evaluator is unavailable.')
+            print(f'Python runtime: {sys.executable}')
+            print(str(exc))
+            return 2
         finally:
             save_crystal_cache()
             save_organism_cache()

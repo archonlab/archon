@@ -41,7 +41,7 @@ def main() -> int:
 
     runtime = RUNTIME.read_text(encoding="utf-8")
     desktop = DESKTOP.read_text(encoding="utf-8")
-    require("runtime_python_command" in runtime and "self.python_command = runtime_python_command(self.root)" in runtime,
+    require("runtime_python_selection" in runtime and "self.python_selection = runtime_python_selection(self.root)" in runtime,
             "runtime bridge does not own the child interpreter contract")
     require('command = ["python3"' not in runtime and '["python3", str(self.snapshot_builder)' not in runtime,
             "Studio runtime still contains a hardcoded python3 process launch")

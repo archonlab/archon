@@ -17,8 +17,17 @@ import json
 import os
 from pathlib import Path
 import subprocess
-import sys
 from typing import Any, Sequence
+
+from Tools.archon_runtime_python import (
+    runtime_python_environment,
+    runtime_python_selection,
+)
+from Universe_Search.search_runtime_contract import (
+    SearchDependencyError,
+    preflight_search_dependencies,
+    search_command_parts,
+)
 
 from Analyzer_next.adapters.observer.cohort_search_runtime import (
     BRIDGE_ID as MATERIALIZATION_BRIDGE_ID,
@@ -332,8 +341,9 @@ class CohortSearchExecutionHandoff:
         launcher = (self.project_root / "Universe_Search" / "search_launcher.py").resolve()
         if not launcher.exists():
             raise CohortSearchExecutionError(f"Search Launcher missing: {launcher}")
-        command = [sys.executable, str(launcher), "--managed-runtime", runtime_id]
-        env = dict(os.environ)
+        selection = runtime_python_selection(self.project_root)
+        command = [*selection.command, str(launcher), "--managed-runtime", runtime_id]
+        env = runtime_python_environment(self.project_root, selection=selection)
         env["PYTHONUNBUFFERED"] = "1"
         env["PYTHONPATH"] = os.pathsep.join(
             item for item in (str(self.project_root), env.get("PYTHONPATH", "")) if item
@@ -425,8 +435,11 @@ class CohortSearchExecutionHandoff:
             live_drift = self._live_search_contract_drift(search)
             if live_drift:
                 raise CohortSearchExecutionError(live_drift[0])
-        if len(command) < 3 or Path(command[2]).resolve() != entrypoint:
-            # BRIDGE3 command is [python3, -u, <entrypoint>, ...].
+        try:
+            _python_prefix, entrypoint_index = search_command_parts(command)
+        except ValueError as exc:
+            raise CohortSearchExecutionError("SEARCH_COMMAND_INTERPRETER_BOUNDARY_MISMATCH") from exc
+        if Path(command[entrypoint_index]).resolve() != entrypoint:
             raise CohortSearchExecutionError("SEARCH_COMMAND_ENTRYPOINT_MISMATCH")
         return runtime, search
 
@@ -616,10 +629,15 @@ class CohortSearchExecutionHandoff:
             raise CohortSearchExecutionError("managed Search checkpoint seed identity mismatch")
 
         pinned = [str(item) for item in _as_list(search.get("command"))]
-        if len(pinned) < 5 or pinned[3] != "evolve":
+        try:
+            python_prefix, entrypoint_index = search_command_parts(pinned)
+        except ValueError as exc:
+            raise CohortSearchExecutionError("managed Search pinned command cannot be resumed safely") from exc
+        run_index = entrypoint_index + 1
+        if run_index >= len(pinned) or pinned[run_index] != "evolve":
             raise CohortSearchExecutionError("managed Search pinned command cannot be resumed safely")
         command = list(pinned)
-        command[3] = "resume"
+        command[run_index] = "resume"
         authorization_id = str(auth.get("authorization_id") or "")
         dispatch_id = _token("OL2-SEARCH-DISPATCH", runtime_id)
         log_path = self.experiments_root / "SearchExecutionLogs" / f"{dispatch_id}.log"
@@ -627,13 +645,18 @@ class CohortSearchExecutionHandoff:
         log_path.parent.mkdir(parents=True, exist_ok=True)
         outcome_path.parent.mkdir(parents=True, exist_ok=True)
         started_at = _now()
-        process_env = dict(os.environ)
+        selection = runtime_python_selection(self.project_root)
+        process_env = runtime_python_environment(self.project_root, selection=selection)
         process_env.update({
             "ARCHON_SEARCH_RUNTIME_ID": runtime_id,
             "ARCHON_SEARCH_DISPATCH_ID": dispatch_id,
             "ARCHON_SEARCH_AUTHORIZATION_ID": authorization_id,
             "ARCHON_SEARCH_OUTCOME_PATH": str(outcome_path),
         })
+        try:
+            preflight_search_dependencies(python_prefix, process_env)
+        except SearchDependencyError as exc:
+            raise CohortSearchExecutionError(str(exc)) from exc
         try:
             with log_path.open("a", encoding="utf-8") as log_handle:
                 process = self.runner.start(
@@ -741,6 +764,10 @@ class CohortSearchExecutionHandoff:
         command = tuple(str(item) for item in _as_list(search.get("command")))
         if not command:
             raise CohortSearchExecutionError("Search command is empty")
+        try:
+            python_prefix, _entrypoint_index = search_command_parts(command)
+        except ValueError as exc:
+            raise CohortSearchExecutionError("Search command interpreter boundary is invalid") from exc
 
         # Claim the single-use start intent before touching the OS.  A second UI
         # click/process will then fail closed even if it races this one.
@@ -765,13 +792,26 @@ class CohortSearchExecutionHandoff:
         log_path.parent.mkdir(parents=True, exist_ok=True)
         outcome_path.parent.mkdir(parents=True, exist_ok=True)
         started_at = _now()
-        process_env = dict(os.environ)
+        selection = runtime_python_selection(self.project_root)
+        process_env = runtime_python_environment(self.project_root, selection=selection)
         process_env.update({
             "ARCHON_SEARCH_RUNTIME_ID": runtime_id,
             "ARCHON_SEARCH_DISPATCH_ID": dispatch_id,
             "ARCHON_SEARCH_AUTHORIZATION_ID": authorization_id,
             "ARCHON_SEARCH_OUTCOME_PATH": str(outcome_path),
         })
+        try:
+            preflight_search_dependencies(python_prefix, process_env)
+        except SearchDependencyError as exc:
+            rollback = self._authorization_registry()
+            for row in _as_list(rollback.get("authorizations")):
+                if isinstance(row, dict) and str(row.get("authorization_id") or "") == authorization_id:
+                    row["execution_starting"] = False
+                    row["execution_start_failed_at"] = _now()
+                    row["execution_start_failure"] = "DEPENDENCY_ERROR"
+            _refresh_auth_registry_hash(rollback)
+            _atomic_json(self.authorization_registry_path, rollback)
+            raise CohortSearchExecutionError(str(exc)) from exc
         try:
             with log_path.open("a", encoding="utf-8") as log_handle:
                 process = self.runner.start(

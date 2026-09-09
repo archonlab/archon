@@ -36,9 +36,19 @@ BRIDGE_ID = "BRIDGE4.2"
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
-from Tools.archon_runtime_python import runtime_python_command
+from Tools.archon_runtime_python import (
+    runtime_python_command,
+    runtime_python_environment,
+    runtime_python_selection,
+)
 from Tools.archon_platform import pid_alive, open_folder
-from Universe_Search.search_runtime_contract import canonical_search_command, validate_search_runtime
+from Universe_Search.search_runtime_contract import (
+    SearchDependencyError,
+    canonical_search_command,
+    preflight_search_dependencies,
+    search_command_parts,
+    validate_search_runtime,
+)
 
 SEARCH_SCRIPT = PROJECT_ROOT / "Universe_Search" / "universe_search_v34_closed_research_cycle.py"
 DEFAULT_EXPERIMENT_PLAN = PROJECT_ROOT / "Results" / "Analysis" / "experiment_plan.json"
@@ -1387,9 +1397,22 @@ class SearchLauncher(tk.Tk):
         self.active_command = run_command
         command = self.build_command(run_command)
         self.append_output("\n" + "=" * 80 + "\nLaunching:\n" + " ".join(shlex.quote(x) for x in command) + "\n" + "=" * 80 + "\n")
-        env = os.environ.copy()
+        selection = runtime_python_selection(PROJECT_ROOT)
+        env = runtime_python_environment(PROJECT_ROOT, selection=selection)
         env["PYTHONUNBUFFERED"] = "1"
         env["PYTHONPATH"] = os.pathsep.join(x for x in (str(PROJECT_ROOT), env.get("PYTHONPATH", "")) if x)
+        try:
+            python_prefix, _entrypoint_index = search_command_parts(command)
+            runtime_info = preflight_search_dependencies(python_prefix, env)
+        except SearchDependencyError as exc:
+            self.status_var.set("Universe Search dependency unavailable")
+            self.append_output(f"\n[Dependency preflight failed]\n{exc}\n")
+            messagebox.showerror("Universe Search cannot start", str(exc), parent=self)
+            return
+        self.append_output(
+            f"Universe Search Python: {runtime_info['python_executable']} "
+            f"(Python {runtime_info['python_version']}, source={selection.source})\n"
+        )
         try:
             self.process = subprocess.Popen(command, cwd=str(PROJECT_ROOT), env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
         except Exception as exc:

@@ -5,8 +5,9 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 import subprocess
-import sys
 from typing import Any
+
+from Tools.archon_runtime_python import runtime_python_command, runtime_python_environment
 
 from Analyzer_next.core.mutation.constants import REPORT_SCHEMA
 from Analyzer_next.execution.observer.shell2.mutations1.model import MutationRecord
@@ -167,7 +168,7 @@ class MutationAnalysisProcessRunner:
 
     def command_for(self, record: MutationRecord) -> tuple[str, ...]:
         return (
-            sys.executable,
+            *runtime_python_command(self.project_root),
             str(self.project_root / "Analyzer_next/cli/mutation_report_one.py"),
             "--manifest",
             str(record.manifest_file.resolve()),
@@ -177,6 +178,7 @@ class MutationAnalysisProcessRunner:
         proc = subprocess.run(
             self.command_for(record),
             cwd=self.project_root,
+            env=runtime_python_environment(self.project_root),
             text=True,
             capture_output=True,
             check=False,

@@ -12,7 +12,9 @@ ROOT = Path(__file__).resolve().parents[1]
 LAUNCHER = ROOT / "Universe_Search/search_launcher.py"
 CORE = ROOT / "Universe_Search/universe_search_core.py"
 CYCLE = ROOT / "Universe_Search/universe_search_v34_closed_research_cycle.py"
-CORE_SHA256 = "f2a715465c9506dc63a4317b3de22049f1c55719b2c87a7eacfb16a693ac871b"
+# WORLD1 runtime-integrity revision: scientific equations/budgets are unchanged;
+# evaluator dependency failures gained a typed, non-scientific error boundary.
+CORE_SHA256 = "b5d34086d678f9f899f32ffcea881a241d5655de422e6714135d2fa7ebe53227"
 
 
 def require(value: bool, message: str) -> None:

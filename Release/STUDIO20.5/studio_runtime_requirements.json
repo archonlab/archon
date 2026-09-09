@@ -34,7 +34,17 @@
   "python": {
     "bundled_runtime_root": "Runtime/python",
     "child_interpreter_contract": "Tools/archon_runtime_python.py",
+    "dependency_preflight": "exact selected interpreter before Universe Search",
     "environment_override": "ARCHON_RUNTIME_PYTHON",
+    "propagated_executable": "ARCHON_PYTHON_EXECUTABLE",
+    "selection_precedence": [
+      "configured",
+      "propagated",
+      "packaged",
+      "inherited",
+      "documented_path_fallback"
+    ],
+    "venv_symlink_preserved": true,
     "minimum": "3.12",
     "stdlib_only_for_studio_bridge": true
   },

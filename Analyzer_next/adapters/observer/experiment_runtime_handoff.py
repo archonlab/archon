@@ -8,7 +8,7 @@ QUEUE1.
 """
 from __future__ import annotations
 
-from Tools.archon_runtime_python import runtime_python_command
+from Tools.archon_runtime_python import runtime_python_command, runtime_python_environment
 
 from dataclasses import replace
 from datetime import datetime, timezone
@@ -717,7 +717,7 @@ class AuditedExperimentRuntimeHandoff:
             raise ExperimentRuntimeHandoffError(
                 f"launch authorization gateway is missing: {self.authorization_script}"
             )
-        env = dict(os.environ)
+        env = runtime_python_environment(self.project_root)
         result = self.runner.run(
             command=(
                 *runtime_python_command(self.project_root),

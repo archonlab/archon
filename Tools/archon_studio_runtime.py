@@ -34,7 +34,11 @@ import time
 from typing import Any
 from urllib.parse import urlparse
 
-from archon_runtime_python import runtime_python_command
+from archon_runtime_python import (
+    probe_runtime_python,
+    runtime_python_environment,
+    runtime_python_selection,
+)
 
 _PROJECT_IMPORT_ROOT = Path(__file__).resolve().parents[1]
 if str(_PROJECT_IMPORT_ROOT) not in sys.path:
@@ -42,7 +46,9 @@ if str(_PROJECT_IMPORT_ROOT) not in sys.path:
 from World_Portability import WorldPortabilityError, WorldPortabilityService  # noqa: E402
 from World_Portability.service import MAX_PACKAGE_BYTES  # noqa: E402
 from Universe_Search.search_runtime_contract import (  # noqa: E402
+    SearchDependencyError,
     canonical_search_command,
+    preflight_search_dependencies,
     validate_search_runtime,
 )
 
@@ -168,7 +174,9 @@ class EngineRuntime:
 class StudioRuntimeBridge:
     def __init__(self, root: Path) -> None:
         self.root = root.resolve()
-        self.python_command = runtime_python_command(self.root)
+        self.python_selection = runtime_python_selection(self.root)
+        self.python_command = list(self.python_selection.command)
+        self.python_diagnostics = probe_runtime_python(self.python_selection)
         self.snapshot_builder = self.root / "Tools" / "archon_studio_snapshot.py"
         self.snapshot_path = self.root / "archon-studio" / "public" / "studio" / "snapshot.json"
         self.snapshot_meta_path = self.snapshot_path.with_name("snapshot.sync.json")
@@ -419,7 +427,14 @@ class StudioRuntimeBridge:
                 "release": platform.release(),
                 "machine": platform.machine(),
             },
-            "python": {"version": platform.python_version(), "executable": sys.executable, "child_runtime_command": list(self.python_command)},
+            "python": {
+                "version": self.python_diagnostics["version"],
+                "executable": self.python_selection.executable,
+                "reported_executable": self.python_diagnostics["reported_executable"],
+                "runtime_source": self.python_selection.source,
+                "child_runtime_command": list(self.python_command),
+                "studio_parent_executable": sys.executable,
+            },
             "tools": {"node": shutil.which("node"), "npm": shutil.which("npm"), "xdg_open": shutil.which("xdg-open")},
             "paths": {
                 "project": self._path_diagnostic(self.root),
@@ -1208,11 +1223,20 @@ class StudioRuntimeBridge:
                 path = Path(component)
                 if path.is_absolute() and path.suffix in {".sh", ".py"} and not path.is_file():
                     return 500, {"error": "engine_entrypoint_missing", "path": path.name}
-            env = os.environ.copy()
+            env = runtime_python_environment(self.root, selection=self.python_selection)
             env["PYTHONUNBUFFERED"] = "1"
             if key == "observer" and launch_mode == "embedded":
                 env.setdefault("ART_EVO_FIELD_BACKEND", "numpy")
             env["PYTHONPATH"] = os.pathsep.join(value for value in (str(self.root), env.get("PYTHONPATH", "")) if value)
+            if key == "search" and launch_mode == "embedded":
+                try:
+                    search_python = preflight_search_dependencies(self.python_command, env)
+                except SearchDependencyError as exc:
+                    runtime.status = "FAILED"
+                    runtime.exit_code = None
+                    runtime.finished_at = utc_now()
+                    runtime.append_event(str(exc), "error")
+                    return 500, {"error": "search_runtime_dependency_missing", "detail": str(exc)}
             try:
                 process = subprocess.Popen(
                     command, cwd=self.root, env=env, stdin=subprocess.DEVNULL,
@@ -1240,6 +1264,15 @@ class StudioRuntimeBridge:
                 runtime.live["source_pid"] = process.pid
             runtime.events.clear()
             runtime.event_seq = 0
+            runtime.append_event(
+                f"ARCHON Python: {self.python_selection.executable} • "
+                f"Python {self.python_diagnostics['version']} • source={self.python_selection.source}"
+            )
+            if key == "search" and launch_mode == "embedded":
+                runtime.append_event(
+                    f"Universe Search Python: {search_python['python_executable']} • "
+                    f"Python {search_python['python_version']}"
+                )
             if key == "observer" and clean_config.get("native_context_handoff"):
                 runtime.append_event(
                     f"Native context handoff opened Observer Launcher 2 with Rule {str(clean_config.get('rule_id') or '').zfill(5)} "
@@ -1686,6 +1719,7 @@ class StudioRuntimeBridge:
                 pass
             completed = subprocess.run(
                 [*self.python_command, str(self.snapshot_builder), "--output", str(temp_output)], cwd=self.root,
+                env=runtime_python_environment(self.root, selection=self.python_selection),
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
                 timeout=180, check=False,
             )

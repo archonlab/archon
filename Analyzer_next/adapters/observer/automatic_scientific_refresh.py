@@ -15,6 +15,8 @@ import subprocess
 import threading
 from typing import Any, Iterable, Sequence
 
+from Tools.archon_runtime_python import runtime_python_environment
+
 from Analyzer_next.execution.observer.shell2.queue1.model import retry_leaf_items
 
 from Analyzer_next.production.automatic_refresh import (
@@ -266,7 +268,7 @@ class AutomaticScientificRefreshHandoff:
                 process = self.process_factory(
                     command,
                     cwd=str(self.paths.project_root),
-                    env=os.environ.copy(),
+                    env=runtime_python_environment(self.paths.project_root),
                     stdout=log_handle,
                     stderr=subprocess.STDOUT,
                     text=True,

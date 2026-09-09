@@ -272,6 +272,18 @@ def variance_grid(grid, avg, radius, boundary_mode="wrap"):
 # validation scripts or notebooks can switch os.environ after importing this file.
 FIELD_MAP_BACKEND = os.environ.get("ART_EVO_FIELD_BACKEND", "numpy").strip().lower()
 
+
+class FieldBackendError(RuntimeError):
+    """Base class for evaluator infrastructure failures, never candidate evidence."""
+
+
+class FieldBackendDependencyError(FieldBackendError):
+    """The selected numerical backend is unavailable in this Python runtime."""
+
+
+class FieldBackendConfigurationError(FieldBackendError):
+    """The numerical backend selection itself is invalid."""
+
 try:
     import numpy as _np
 except Exception:
@@ -304,7 +316,7 @@ def _selected_field_map_backend():
     backend = aliases.get(backend, backend)
 
     if backend not in ("numpy", "cupy"):
-        raise RuntimeError(
+        raise FieldBackendConfigurationError(
             f"Unknown ART_EVO_FIELD_BACKEND={backend!r}. Use 'numpy' or 'cupy'."
         )
 
@@ -325,13 +337,18 @@ def _array_module_for_feature_maps():
     backend = _selected_field_map_backend()
     if backend == "cupy":
         if _cp is None:
-            raise RuntimeError("ART_EVO_FIELD_BACKEND=cupy requested, but CuPy is not installed/importable.")
+            raise FieldBackendDependencyError("ART_EVO_FIELD_BACKEND=cupy requested, but CuPy is not installed/importable.")
         return _cp
     if backend == "numpy":
         if _np is None:
-            raise RuntimeError("ART_EVO_FIELD_BACKEND=numpy requested, but NumPy is not installed/importable.")
+            raise FieldBackendDependencyError("ART_EVO_FIELD_BACKEND=numpy requested, but NumPy is not installed/importable.")
         return _np
     return None
+
+
+def require_field_backend():
+    """Fail before candidate evaluation when evaluator infrastructure is absent."""
+    return _array_module_for_feature_maps()
 
 
 def _to_cpu_list(xp, arr):

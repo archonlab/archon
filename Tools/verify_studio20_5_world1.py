@@ -38,6 +38,7 @@ def main() -> int:
         sys.path.insert(0, str(ROOT))
     from Universe_Search.search_runtime_contract import REQUIRED_RUNTIME_FILES
 
+    run(sys.executable, "-B", ROOT / "Tools/verify_python_runtime_inheritance.py")
     run(sys.executable, "-B", ROOT / "Tools/verify_world1_portability.py")
     run(sys.executable, "-B", ROOT / "Tools/verify_ol2_ux_fix.py")
     run(sys.executable, "-B", ROOT / "Tools/verify_search_launcher_small_screen.py")

@@ -545,6 +545,7 @@ Docs/Audits/2026-09-06/reproduce/test_mechanism_scientific_semantics.py
 Docs/Audits/2026-09-06/reproduce/test_mechanism_zero_values.py
 Docs/Audits/2026-09-06/reproduce/test_sciencefix2_value_semantics.py
 Docs/Audits/2026-09-06/reproduce/test_source_tree_seal_policy.py
+Docs/Audits/2026-09-09/STUDIO20_5_PYTHON_RUNTIME_INHERITANCE.md
 Docs/Audits/2026-09-09/STUDIO20_5_REAL_SEARCH_RELEASE.md
 Docs/STUDIO20/BUILD_AND_ACCEPTANCE.md
 Docs/STUDIO20/WINDOWS_AUDIT.md
@@ -706,6 +707,7 @@ Tools/archon_world.py
 Tools/diagnose_observer_launcher_2_experiments.py
 Tools/observer_launcher_2_cutover.py
 Tools/verify_ol2_ux_fix.py
+Tools/verify_python_runtime_inheritance.py
 Tools/verify_search_launcher_small_screen.py
 Tools/verify_studio18_platform_portability.py
 Tools/verify_studio19_distribution_foundation.py

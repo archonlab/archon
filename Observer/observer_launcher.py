@@ -57,7 +57,7 @@ from Analyzer_next.adapters.telemetry.experimental_conditions_routing import (
     ExperimentRole,
     InitialStateMode,
 )
-from Tools.archon_runtime_python import runtime_python_command
+from Tools.archon_runtime_python import runtime_python_command, runtime_python_environment
 from Analyzer_next.production.runtime_routes import (
     COMPATIBILITY_ROOT,
     cli_route,
@@ -6123,7 +6123,7 @@ class ObserverLaboratory(tk.Tk):
         self._refresh_queue(current=run)
 
         cmd = self._base_command(run)
-        env = os.environ.copy()
+        env = runtime_python_environment(PROJECT_ROOT)
         # Portable CPU default.  A user may opt into a configured CuPy/CUDA
         # installation by exporting ART_EVO_FIELD_BACKEND=cupy before launch.
         env.setdefault("ART_EVO_FIELD_BACKEND", "numpy")

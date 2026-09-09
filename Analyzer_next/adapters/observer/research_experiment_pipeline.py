@@ -17,6 +17,7 @@ import sys
 import subprocess
 from types import SimpleNamespace
 from typing import Any, Callable, Iterable
+from Tools.archon_runtime_python import runtime_python_command, runtime_python_environment
 from Analyzer_next.execution.observer.shell2.functions1f.model import ExperimentPipelineResult
 from Analyzer_next.research.cycle.authoritative_lifecycle import (
     AuthoritativeLifecycleError,
@@ -901,12 +902,12 @@ class AuditedResearchExperimentPipeline:
     ) -> Any:
         if not module.is_file():
             raise ResearchExperimentPipelineError(f"required module missing: {module}")
-        command = [sys.executable, str(module), *args]
+        command = [*runtime_python_command(self.project_root), str(module), *args]
         self._emit(progress, "process", label)
         result = self.runner.run(
             command=command,
             cwd=self.project_root,
-            environment=os.environ.copy(),
+            environment=runtime_python_environment(self.project_root),
             timeout=self.timeout,
         )
         if int(result.returncode) not in accepted:
