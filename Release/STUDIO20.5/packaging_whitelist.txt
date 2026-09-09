@@ -545,6 +545,7 @@ Docs/Audits/2026-09-06/reproduce/test_mechanism_scientific_semantics.py
 Docs/Audits/2026-09-06/reproduce/test_mechanism_zero_values.py
 Docs/Audits/2026-09-06/reproduce/test_sciencefix2_value_semantics.py
 Docs/Audits/2026-09-06/reproduce/test_source_tree_seal_policy.py
+Docs/Audits/2026-09-09/STUDIO20_5_REAL_SEARCH_RELEASE.md
 Docs/STUDIO20/BUILD_AND_ACCEPTANCE.md
 Docs/STUDIO20/WINDOWS_AUDIT.md
 Docs/WORLD1_PORTABLE_WORLDS.md
@@ -705,6 +706,7 @@ Tools/archon_world.py
 Tools/diagnose_observer_launcher_2_experiments.py
 Tools/observer_launcher_2_cutover.py
 Tools/verify_ol2_ux_fix.py
+Tools/verify_search_launcher_small_screen.py
 Tools/verify_studio18_platform_portability.py
 Tools/verify_studio19_distribution_foundation.py
 Tools/verify_studio20_1_scientific_semantics.py
@@ -713,6 +715,7 @@ Tools/verify_studio20_3_source_policy.py
 Tools/verify_studio20_4_search_ux.py
 Tools/verify_studio20_5_world1.py
 Tools/verify_studio20_windows_distribution.py
+Tools/verify_studio_real_search_release.py
 Tools/verify_world1_portability.py
 UNIVERSE SEARCH.sh
 Universe_Search/__init__.py
@@ -729,6 +732,7 @@ Universe_Search/scientific_state.py
 Universe_Search/scientific_state_builder.py
 Universe_Search/search_job_loader.py
 Universe_Search/search_launcher.py
+Universe_Search/search_runtime_contract.py
 Universe_Search/target_scoring.py
 Universe_Search/theory_engine.py
 Universe_Search/universe_search_core.py

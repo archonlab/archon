@@ -41,6 +41,10 @@ if str(_PROJECT_IMPORT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_IMPORT_ROOT))
 from World_Portability import WorldPortabilityError, WorldPortabilityService  # noqa: E402
 from World_Portability.service import MAX_PACKAGE_BYTES  # noqa: E402
+from Universe_Search.search_runtime_contract import (  # noqa: E402
+    canonical_search_command,
+    validate_search_runtime,
+)
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
@@ -72,6 +76,7 @@ _BEST_RE = re.compile(r"BEST\s+gen=(\d+):\s+rule=([^\s]+)\s+score=([^\s]+)\s+\|\
 _GEN_TIME_RE = re.compile(r"generation time:\s+([0-9.]+)\s+min")
 _STUDIO_OBSERVER_PREFIX = "ARCHON_STUDIO_OBSERVER_JSON="
 _HEADLESS_OBSERVER_PREFIX = "ARCHON_HEADLESS_OBSERVER_JSON="
+_SEARCH_RUNTIME_PREFIX = "ARCHON_SEARCH_RUNTIME_JSON="
 
 
 def utc_now() -> str:
@@ -147,6 +152,7 @@ class EngineRuntime:
     config: dict[str, Any] = field(default_factory=dict)
     live: dict[str, Any] = field(default_factory=dict)
     event_seq: int = 0
+    started_ns: int = 0
     events: deque[dict[str, Any]] = field(default_factory=lambda: deque(maxlen=160))
     lock: threading.RLock = field(default_factory=threading.RLock)
 
@@ -540,7 +546,13 @@ class StudioRuntimeBridge:
             alive = process is not None and process.poll() is None
             status = runtime.status
             if process is not None and not alive and status in {"RUNNING", "PAUSED"}:
-                status = "COMPLETE" if process.returncode == 0 else "FAILED"
+                attested_search = (
+                    runtime.spec.key == "search"
+                    and runtime.launch_mode == "embedded"
+                    and runtime.live.get("process_attested")
+                    and runtime.live.get("completion_attested")
+                )
+                status = "COMPLETE" if process.returncode == 0 and (runtime.spec.key != "search" or runtime.launch_mode != "embedded" or attested_search) else "FAILED"
             return {
                 "key": runtime.spec.key,
                 "label": runtime.spec.label,
@@ -569,7 +581,7 @@ class StudioRuntimeBridge:
                 "host": DEFAULT_HOST,
                 "pid": os.getpid(),
                 "version": STUDIO_BUILD_VERSION,
-                "capabilities": ["embedded_search", "embedded_observer", "embedded_observer_preview", "observer_fast_live", "observer_preview_stop_choices", "observer_native_context_handoff", "native_fallback", "snapshot_refresh", "adapter_manager_v1", "studio_settings_v1", "studio_diagnostics_v1", "open_folder_v1", "runtime_sync_v1", "preview_asset_sync_v1", "release_readiness_v1", "production_frontend_v1", "desktop_launcher_v1", "world_portability_v1", "world_collection_export_v1", "world_collection_import_v1"],
+                "capabilities": ["embedded_search", "canonical_search_runtime_v1", "pid_bound_search_telemetry_v1", "embedded_observer", "embedded_observer_preview", "observer_fast_live", "observer_preview_stop_choices", "observer_native_context_handoff", "native_fallback", "snapshot_refresh", "adapter_manager_v1", "studio_settings_v1", "studio_diagnostics_v1", "open_folder_v1", "runtime_sync_v1", "preview_asset_sync_v1", "release_readiness_v1", "production_frontend_v1", "desktop_launcher_v1", "world_portability_v1", "world_collection_export_v1", "world_collection_import_v1"],
             },
             "snapshot": {
                 "revision": self.snapshot_revision(),
@@ -910,19 +922,22 @@ class StudioRuntimeBridge:
         experiment_plan = str(config.get("experiment_plan") or self.default_experiment_plan.relative_to(self.root).as_posix()).strip()
         job_id = str(config.get("search_job") or "").strip()
         target = str(config.get("target_regime") or "").strip()
-        command = [*self.python_command, "-u", str(self.search_script), run_command, score_mode, "--search-mode", search_mode]
+        plan: Path | None = None
         if search_mode in {"cohort_target", "counterexample"}:
             plan = self._project_path(experiment_plan, must_exist=True)
             if not job_id and not target:
                 raise ValueError("cohort_target/counterexample requires a Search job or target regime")
-            command.extend(["--experiment-plan", str(plan)])
-            if job_id:
-                command.extend(["--search-job", job_id])
-            else:
-                command.extend(["--target-regime", target])
-        if search_mode in {"diversity", "cohort_target", "counterexample", "local_around_rule"}:
-            for rid in seeds:
-                command.extend(["--seed-rule", rid])
+        command = canonical_search_command(
+            self.root,
+            self.python_command,
+            run_command,
+            score_mode,
+            search_mode,
+            experiment_plan=plan,
+            search_job=job_id,
+            target_regime=target,
+            seed_rules=(seeds if search_mode in {"diversity", "cohort_target", "counterexample", "local_around_rule"} else ()),
+        )
         clean = {
             "ui_mode": "embedded",
             "run_command": run_command,
@@ -1097,6 +1112,15 @@ class StudioRuntimeBridge:
                 "target_coverage": None, "overall_rule": None, "overall_score": None,
                 "best_ever_rule": None, "best_ever_score": None, "complete": False,
                 "completed_generation_seconds": 0.0, "current_generation_elapsed_seconds": 0,
+                "runtime_backend": "canonical_universe_search_process",
+                "telemetry_source": "process_stdout",
+                "source_pid": None,
+                "process_attested": False,
+                "completion_attested": False,
+                "runtime_id": None,
+                "committed_generations": [],
+                "artifact_verified": False,
+                "artifact_path": None,
             }
         if key == "observer" and mode == "embedded":
             return {
@@ -1169,6 +1193,13 @@ class StudioRuntimeBridge:
                         return 500, {"error": "observer_native_switch_timeout", "detail": str(exc)}
                 self._finalize_observer_preview(runtime, "discard")
                 self.request_snapshot_refresh(reason="observer-native-switch", immediate=True)
+            if key == "search":
+                try:
+                    validate_search_runtime(self.root)
+                except RuntimeError as exc:
+                    runtime.status = "FAILED"
+                    runtime.append_event(str(exc), "error")
+                    return 500, {"error": "canonical_search_runtime_incomplete", "detail": str(exc)}
             try:
                 command, launch_mode, clean_config = self._resolve_launch(key, config)
             except (ValueError, OSError) as exc:
@@ -1198,12 +1229,15 @@ class StudioRuntimeBridge:
             runtime.status = "RUNNING"
             runtime.pid = process.pid
             runtime.started_at = utc_now()
+            runtime.started_ns = time.time_ns()
             runtime.finished_at = None
             runtime.exit_code = None
             runtime.stop_requested = False
             runtime.launch_mode = launch_mode
             runtime.config = clean_config
             runtime.live = self._initial_live(key, launch_mode, clean_config)
+            if key == "search" and launch_mode == "embedded":
+                runtime.live["source_pid"] = process.pid
             runtime.events.clear()
             runtime.event_seq = 0
             if key == "observer" and clean_config.get("native_context_handoff"):
@@ -1218,8 +1252,63 @@ class StudioRuntimeBridge:
             threading.Thread(target=self._wait_process, args=(runtime, process), name=f"studio-{key}-wait", daemon=True).start()
         return 200, {"ok": True, "engine": self._engine_payload(runtime)}
 
-    def _update_search_live(self, runtime: EngineRuntime, line: str) -> None:
+    def _update_search_attestation(self, runtime: EngineRuntime, process: subprocess.Popen[str], payload: dict[str, Any]) -> bool:
+        if payload.get("schema") != "archon_search_runtime_v1" or int(payload.get("pid") or 0) != process.pid:
+            runtime.append_event("Rejected invalid Universe Search runtime attestation.", "error")
+            return False
+        event = str(payload.get("event") or "")
         live = runtime.live
+        if event == "process_started":
+            live.update({
+                "process_attested": True,
+                "source_pid": process.pid,
+                "runtime_id": str(payload.get("search_run_id") or ""),
+                "generations": int(payload.get("generations") or live.get("generations") or 0),
+                "population": int(payload.get("population") or live.get("population") or 0),
+            })
+            return True
+        if not live.get("process_attested") or payload.get("search_run_id") != live.get("runtime_id"):
+            runtime.append_event("Rejected out-of-order Universe Search runtime telemetry.", "error")
+            return False
+        if event == "generation_committed":
+            generation = int(payload.get("generation") or 0)
+            raw_path = str(payload.get("artifact") or "")
+            artifact = (self.root / raw_path).resolve()
+            results_root = (self.root / "Results" / "Universe_Search").resolve()
+            valid = False
+            try:
+                artifact.relative_to(results_root)
+                rows = json.loads(artifact.read_text(encoding="utf-8"))
+                valid = artifact.is_file() and isinstance(rows, list) and len(rows) == int(payload.get("results") or 0)
+            except (ValueError, OSError, json.JSONDecodeError, TypeError):
+                valid = False
+            if not valid:
+                runtime.append_event("Universe Search reported an invalid generation artifact.", "error")
+                return False
+            committed = list(live.get("committed_generations") or [])
+            if generation not in committed:
+                committed.append(generation)
+            live.update({"committed_generations": committed, "artifact_verified": True, "artifact_path": raw_path})
+            return True
+        if event == "search_complete":
+            live.update({"completion_attested": True, "complete": True, "workers": 0})
+            return True
+        return False
+
+    def _update_search_live(self, runtime: EngineRuntime, process: subprocess.Popen[str], line: str) -> None:
+        live = runtime.live
+        if line.startswith(_SEARCH_RUNTIME_PREFIX):
+            try:
+                payload = json.loads(line[len(_SEARCH_RUNTIME_PREFIX):])
+            except (json.JSONDecodeError, TypeError) as exc:
+                runtime.append_event(f"Universe Search runtime telemetry parse error: {exc}", "error")
+                return
+            self._update_search_attestation(runtime, process, payload)
+            return
+        # Human-readable progress is accepted only after the canonical child
+        # process has identified itself with a PID-bound structured event.
+        if not live.get("process_attested"):
+            return
         if match := _GEN_RE.search(line):
             gen, total, _mode = match.groups()
             live.update({"generation": int(gen), "generations": int(total), "evaluated": 0, "failed": 0, "current_generation_elapsed_seconds": 0})
@@ -1241,9 +1330,6 @@ class StudioRuntimeBridge:
         if match := _GEN_TIME_RE.search(line):
             live["completed_generation_seconds"] = float(live.get("completed_generation_seconds") or 0.0) + float(match.group(1)) * 60.0
             live["current_generation_elapsed_seconds"] = 0
-        if "Search complete." in line:
-            live["complete"] = True
-            live["workers"] = 0
         generations = max(0, int(live.get("generations") or 0))
         population = max(0, int(live.get("population") or 0))
         generation = max(0, int(live.get("generation") or 0))
@@ -1303,7 +1389,7 @@ class StudioRuntimeBridge:
                 stripped = line.rstrip("\n")
                 with runtime.lock:
                     if runtime.spec.key == "search" and runtime.launch_mode == "embedded":
-                        self._update_search_live(runtime, stripped)
+                        self._update_search_live(runtime, process, stripped)
                     if runtime.spec.key == "observer" and runtime.launch_mode == "embedded":
                         if stripped.startswith(_STUDIO_OBSERVER_PREFIX):
                             try:
@@ -1344,6 +1430,18 @@ class StudioRuntimeBridge:
             if runtime.stop_requested:
                 runtime.status = "IDLE"
                 runtime.append_event("Process stopped by Studio.", "warning")
+            elif (
+                code == 0
+                and runtime.spec.key == "search"
+                and runtime.launch_mode == "embedded"
+                and not (runtime.live.get("process_attested") and runtime.live.get("completion_attested"))
+            ):
+                runtime.status = "FAILED"
+                runtime.append_event(
+                    "Canonical Universe Search process exited without complete PID-bound runtime telemetry. "
+                    "Studio will not treat simulated or unattested activity as a successful Search.",
+                    "error",
+                )
             elif code == 0:
                 runtime.status = "COMPLETE"
                 runtime.append_event("Process exited successfully.", "success")
@@ -2060,6 +2158,8 @@ def self_test(root: Path) -> int:
     assert set(payload["engines"]) == set(ENGINE_NAMES)
     assert payload["bridge"]["root"] == "."
     assert "embedded_search" in payload["bridge"]["capabilities"]
+    assert "canonical_search_runtime_v1" in payload["bridge"]["capabilities"]
+    assert "pid_bound_search_telemetry_v1" in payload["bridge"]["capabilities"]
     assert "embedded_observer_preview" in payload["bridge"]["capabilities"]
     assert "observer_preview_stop_choices" in payload["bridge"]["capabilities"]
     assert bridge.observer_studio_adapter.is_file()
@@ -2100,7 +2200,8 @@ def self_test(root: Path) -> int:
     assert str(bridge.observer_launcher_adapter) in native_cmd and "--headless" not in native_cmd
     assert native_config["rule_id"] == "00251" and native_config["native_context_handoff"] is True
     assert native_config["native_target"] == "ol2_launcher_context" and native_config["handoff_semantics"] == "ol2-config-prefill-fresh-native-review"
-    print("PASS: STUDIO20.5 runtime bridge includes local portable World import/export over the canonical Atlas")
+    assert validate_search_runtime(root) == bridge.search_script
+    print("PASS: STUDIO20.5 runtime bridge includes portable Worlds and fail-closed PID-attested canonical Universe Search")
     return 0
 
 

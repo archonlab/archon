@@ -38,6 +38,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 from Tools.archon_runtime_python import runtime_python_command
 from Tools.archon_platform import pid_alive, open_folder
+from Universe_Search.search_runtime_contract import canonical_search_command, validate_search_runtime
 
 SEARCH_SCRIPT = PROJECT_ROOT / "Universe_Search" / "universe_search_v34_closed_research_cycle.py"
 DEFAULT_EXPERIMENT_PLAN = PROJECT_ROOT / "Results" / "Analysis" / "experiment_plan.json"
@@ -442,6 +443,13 @@ def progress_display_labels(
     return workers, format_duration(snapshot.eta_seconds)
 
 
+def launcher_window_size(screen_width: int, screen_height: int) -> tuple[int, int]:
+    """Choose the legacy desktop size without overflowing a compact display."""
+    width = min(1180, max(900, int(screen_width) - 80))
+    height = min(820, max(520, int(screen_height) - 120))
+    return width, height
+
+
 class SearchLauncher(tk.Tk):
     def __init__(self, *, managed_runtime: str | None = None, theme: str = "auto") -> None:
         super().__init__()
@@ -490,8 +498,11 @@ class SearchLauncher(tk.Tk):
         self.previous_search_mode = self.search_mode_var.get()
 
         self.title(f"Project ARCHON Search Launcher {LAUNCHER_VERSION}")
-        self.geometry("1180x820")
-        self.minsize(1020, 720)
+        initial_width, initial_height = launcher_window_size(
+            self.winfo_screenwidth(), self.winfo_screenheight()
+        )
+        self.geometry(f"{initial_width}x{initial_height}")
+        self.minsize(900, 460)
 
         self._build_ui()
         self._bind_events()
@@ -518,9 +529,11 @@ class SearchLauncher(tk.Tk):
     def _build_ui(self) -> None:
         self.root_frame = ttk.Frame(self, style="Archon.Root.TFrame", padding=(18, 14))
         self.root_frame.pack(fill="both", expand=True)
+        self.root_frame.columnconfigure(0, weight=1)
+        self.root_frame.rowconfigure(1, weight=1)
 
         header = ttk.Frame(self.root_frame, style="Archon.Root.TFrame")
-        header.pack(fill="x", pady=(0, 10))
+        header.grid(row=0, column=0, sticky="ew", pady=(0, 10))
         title_box = ttk.Frame(header, style="Archon.Root.TFrame")
         title_box.pack(side="left")
         ttk.Label(title_box, text="Project ARCHON", style="Archon.Brand.TLabel").pack(anchor="w")
@@ -534,7 +547,7 @@ class SearchLauncher(tk.Tk):
         ttk.Button(header, text="Settings", command=self._show_settings_dialog, style="Archon.Secondary.TButton").pack(side="right")
 
         self.notebook = ttk.Notebook(self.root_frame, style="Archon.TNotebook")
-        self.notebook.pack(fill="both", expand=True)
+        self.notebook.grid(row=1, column=0, sticky="nsew")
         self.launch_tab = ttk.Frame(self.notebook, style="Archon.Root.TFrame", padding=(0, 12))
         self.job_tab = ttk.Frame(self.notebook, style="Archon.Root.TFrame", padding=(0, 12))
         self.command_tab = ttk.Frame(self.notebook, style="Archon.Root.TFrame", padding=(0, 12))
@@ -544,14 +557,45 @@ class SearchLauncher(tk.Tk):
         self.notebook.add(self.command_tab, text=" Launch Command ")
         self.notebook.add(self.output_tab, text=" Process Output ")
 
-        top = ttk.Frame(self.launch_tab, style="Archon.Root.TFrame")
+        self.launch_tab.columnconfigure(0, weight=1)
+        self.launch_tab.rowconfigure(0, weight=1)
+        self.launch_canvas = tk.Canvas(
+            self.launch_tab,
+            borderwidth=0,
+            highlightthickness=0,
+            yscrollincrement=24,
+        )
+        self.launch_canvas.grid(row=0, column=0, sticky="nsew")
+        self.launch_scrollbar = ttk.Scrollbar(
+            self.launch_tab,
+            orient="vertical",
+            command=self.launch_canvas.yview,
+        )
+        self.launch_scrollbar.grid(row=0, column=1, sticky="ns", padx=(8, 0))
+        self.launch_canvas.configure(yscrollcommand=self.launch_scrollbar.set)
+        self.launch_content = ttk.Frame(
+            self.launch_canvas,
+            style="Archon.Root.TFrame",
+        )
+        self.launch_content_window = self.launch_canvas.create_window(
+            (0, 0),
+            window=self.launch_content,
+            anchor="nw",
+        )
+        self.launch_content.bind("<Configure>", self._sync_launch_scrollregion)
+        self.launch_canvas.bind("<Configure>", self._resize_launch_content)
+        self.bind("<MouseWheel>", self._scroll_launch_content, add="+")
+        self.bind("<Button-4>", self._scroll_launch_content, add="+")
+        self.bind("<Button-5>", self._scroll_launch_content, add="+")
+
+        top = ttk.Frame(self.launch_content, style="Archon.Root.TFrame")
         top.pack(fill="x")
         top.columnconfigure(0, weight=3)
         top.columnconfigure(1, weight=2)
 
-        config_card = self._card(top, "Search Configuration")
-        config_card.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
-        config = ttk.Frame(config_card, style="Archon.Card.TFrame", padding=(14, 4, 14, 12))
+        self.config_card = self._card(top, "Search Configuration")
+        self.config_card.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
+        config = ttk.Frame(self.config_card, style="Archon.Card.TFrame", padding=(14, 4, 14, 12))
         config.pack(fill="both", expand=True)
         config.columnconfigure(1, weight=1)
         self.score_combo = self._field_combo(config, 0, "Score mode", self.score_mode_var, detect_score_modes())
@@ -582,9 +626,9 @@ class SearchLauncher(tk.Tk):
         summary_card.pack(fill="both", expand=True, pady=(12, 0))
         ttk.Label(summary_card, textvariable=self.summary_var, style="Archon.Body.TLabel", wraplength=430, justify="left").pack(anchor="w", padx=14, pady=(4, 14))
 
-        progress_card = self._card(self.launch_tab, "Search Progress")
-        progress_card.pack(fill="x", pady=(14, 0))
-        progress_body = ttk.Frame(progress_card, style="Archon.Card.TFrame", padding=(14, 3, 14, 14))
+        self.progress_card = self._card(self.launch_content, "Search Progress")
+        self.progress_card.pack(fill="x", pady=(14, 0))
+        progress_body = ttk.Frame(self.progress_card, style="Archon.Card.TFrame", padding=(14, 3, 14, 14))
         progress_body.pack(fill="x")
         progress_head = ttk.Frame(progress_body, style="Archon.Card.TFrame")
         progress_head.pack(fill="x")
@@ -610,13 +654,14 @@ class SearchLauncher(tk.Tk):
         ttk.Label(progress_body, textvariable=self.champions_var, style="Archon.Muted.TLabel").pack(anchor="w", pady=(11, 0))
         ttk.Label(progress_body, textvariable=self.scientific_var, style="Archon.Muted.TLabel").pack(anchor="w", pady=(4, 0))
 
-        command_card = self._card(self.launch_tab, "Launch Command")
-        command_card.pack(fill="x", pady=(14, 0))
-        self.command_entry = ttk.Entry(command_card, textvariable=self.command_var, state="readonly", style="Archon.TEntry")
+        self.command_card = self._card(self.launch_content, "Launch Command")
+        self.command_card.pack(fill="x", pady=(14, 0))
+        self.command_entry = ttk.Entry(self.command_card, textvariable=self.command_var, state="readonly", style="Archon.TEntry")
         self.command_entry.pack(fill="x", padx=14, pady=(3, 14))
 
         actions = ttk.Frame(self.root_frame, style="Archon.Root.TFrame")
-        actions.pack(fill="x", pady=(12, 0))
+        actions.grid(row=2, column=0, sticky="ew", pady=(12, 0))
+        self.action_bar = actions
         self.launch_button = ttk.Button(actions, text="Start New Search", command=self.launch_search, style="Archon.Primary.TButton")
         self.launch_button.pack(side="left")
         self.resume_button = ttk.Button(actions, text="Resume from Checkpoint", command=self.resume_search, style="Archon.Secondary.TButton")
@@ -625,19 +670,24 @@ class SearchLauncher(tk.Tk):
         self.stop_button.pack(side="left", padx=(8, 0))
         ttk.Button(actions, text="Copy Command", command=self.copy_command, style="Archon.Secondary.TButton").pack(side="left", padx=(8, 0))
         ttk.Button(actions, text="Open Run Folder", command=self.open_run_folder, style="Archon.Secondary.TButton").pack(side="left", padx=(8, 0))
-        ttk.Label(actions, textvariable=self.status_var, style="Archon.Muted.TLabel").pack(side="right")
+        self.status_label = ttk.Label(
+            actions,
+            textvariable=self.status_var,
+            style="Archon.Muted.TLabel",
+        )
+        self.status_label.pack(side="right")
 
         # Research Job tab
         job_card = self._card(self.job_tab, "Selected Research Job")
         job_card.pack(fill="both", expand=True)
-        self.job_info = tk.Text(job_card, height=18, wrap="word", relief="flat", borderwidth=0, padx=14, pady=12, state="disabled")
+        self.job_info = tk.Text(job_card, height=4, wrap="word", relief="flat", borderwidth=0, padx=14, pady=12, state="disabled")
         self.job_info.pack(fill="both", expand=True, padx=1, pady=(0, 1))
 
         # Command tab
         command_detail_card = self._card(self.command_tab, "Pinned / Previewed Launch Command")
-        command_detail_card.pack(fill="x")
-        self.command_text = tk.Text(command_detail_card, height=10, wrap="word", relief="flat", borderwidth=0, padx=14, pady=12, state="disabled")
-        self.command_text.pack(fill="x", padx=1, pady=(0, 1))
+        command_detail_card.pack(fill="both", expand=True)
+        self.command_text = tk.Text(command_detail_card, height=4, wrap="word", relief="flat", borderwidth=0, padx=14, pady=12, state="disabled")
+        self.command_text.pack(fill="both", expand=True, padx=1, pady=(0, 1))
         ttk.Label(
             self.command_tab,
             text="Managed mode keeps this scientific command read-only. Resume may only replace the evolve verb with resume.",
@@ -650,11 +700,54 @@ class SearchLauncher(tk.Tk):
         output_card.pack(fill="both", expand=True)
         output_body = ttk.Frame(output_card, style="Archon.Card.TFrame")
         output_body.pack(fill="both", expand=True, padx=1, pady=(0, 1))
-        self.output = tk.Text(output_body, wrap="none", relief="flat", borderwidth=0, padx=12, pady=10, state="disabled")
+        self.output = tk.Text(output_body, height=4, wrap="none", relief="flat", borderwidth=0, padx=12, pady=10, state="disabled")
         self.output.pack(side="left", fill="both", expand=True)
         scrollbar = ttk.Scrollbar(output_body, orient="vertical", command=self.output.yview)
         scrollbar.pack(side="right", fill="y")
         self.output.configure(yscrollcommand=scrollbar.set)
+
+    def _resize_launch_content(self, event: tk.Event) -> None:
+        self.launch_canvas.itemconfigure(
+            self.launch_content_window,
+            width=max(1, int(event.width)),
+        )
+        self.after_idle(self._sync_launch_scrollregion)
+
+    def _sync_launch_scrollregion(self, _event: tk.Event | None = None) -> None:
+        self.launch_content.update_idletasks()
+        required_height = self.launch_content.winfo_reqheight()
+        viewport_height = self.launch_canvas.winfo_height()
+        self.launch_canvas.configure(
+            scrollregion=(0, 0, self.launch_canvas.winfo_width(), required_height)
+        )
+        if required_height > viewport_height + 1:
+            self.launch_scrollbar.grid()
+        else:
+            self.launch_scrollbar.grid_remove()
+            self.launch_canvas.yview_moveto(0.0)
+
+    def _scroll_launch_content(self, event: tk.Event) -> str | None:
+        if self.notebook.select() != str(self.launch_tab):
+            return None
+        widget = event.widget
+        while widget is not None and widget is not self.launch_content:
+            if widget is self.launch_canvas:
+                break
+            widget = getattr(widget, "master", None)
+        if widget not in {self.launch_content, self.launch_canvas}:
+            return None
+        if self.launch_content.winfo_reqheight() <= self.launch_canvas.winfo_height():
+            return None
+        number = getattr(event, "num", None)
+        delta = int(getattr(event, "delta", 0) or 0)
+        if number == 4 or delta > 0:
+            direction = -1
+        elif number == 5 or delta < 0:
+            direction = 1
+        else:
+            return None
+        self.launch_canvas.yview_scroll(direction * 3, "units")
+        return "break"
 
     def _card(self, parent: tk.Widget, title: str) -> ttk.Frame:
         outer = ttk.Frame(parent, style="Archon.Card.TFrame")
@@ -677,6 +770,8 @@ class SearchLauncher(tk.Tk):
         self.theme_name = theme
         c = PALETTES[theme]
         self.configure(background=c["window"])
+        if hasattr(self, "launch_canvas"):
+            self.launch_canvas.configure(background=c["window"])
         style = ttk.Style(self)
         try:
             style.theme_use("clam")
@@ -920,22 +1015,28 @@ class SearchLauncher(tk.Tk):
             if run_command == "resume" and len(command) >= 4 and command[3] == "evolve":
                 command[3] = "resume"
             return command
-        command = [*runtime_python_command(PROJECT_ROOT), "-u", str(SEARCH_SCRIPT), run_command, self.score_mode_var.get(), "--search-mode", self.search_mode_var.get()]
+        plan_path: Path | None = None
         mode = self.search_mode_var.get()
         if mode in {"cohort_target", "counterexample"}:
             plan = self.plan_path_var.get().strip()
             if plan:
-                command.extend(["--experiment-plan", plan])
+                plan_path = Path(plan)
             job_id = self.job_id_var.get().strip()
             target = self.target_var.get().strip()
-            if job_id:
-                command.extend(["--search-job", job_id])
-            elif target:
-                command.extend(["--target-regime", target])
-        if mode in {"diversity", "cohort_target", "counterexample", "local_around_rule"}:
-            for rid in self.parsed_seed_rules():
-                command.extend(["--seed-rule", rid])
-        return command
+        else:
+            job_id = ""
+            target = ""
+        return canonical_search_command(
+            PROJECT_ROOT,
+            runtime_python_command(PROJECT_ROOT),
+            run_command,
+            self.score_mode_var.get(),
+            mode,
+            experiment_plan=plan_path,
+            search_job=job_id,
+            target_regime=target,
+            seed_rules=(self.parsed_seed_rules() if mode in {"diversity", "cohort_target", "counterexample", "local_around_rule"} else ()),
+        )
 
     def update_command_preview(self) -> None:
         command = self.build_command("evolve")
@@ -1272,6 +1373,12 @@ class SearchLauncher(tk.Tk):
         self._attach_managed_log(replay=False)
 
     def start_search_process(self, run_command: str) -> None:
+        try:
+            validate_search_runtime(PROJECT_ROOT)
+        except RuntimeError as exc:
+            self.status_var.set("Canonical Search runtime is incomplete")
+            messagebox.showerror("Universe Search unavailable", str(exc), parent=self)
+            return
         if self.process is not None:
             messagebox.showinfo("Search Already Running", "A Search process is already running.", parent=self)
             return
